@@ -1,5 +1,5 @@
 # personalized
-constants.cpp
+./constants.cpp
 
 # Prerequisites
 *.d
