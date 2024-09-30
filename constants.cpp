@@ -1,3 +1,4 @@
+// discarded, please use the python version
 // using enum class constants in c++: items::FridgeItems::RED_CAN
 
 namespace items{
@@ -22,6 +23,7 @@ namespace items{
     };
 }
 
+// tinker positions with orientation
 namespace tinker_pos{
     enum class GlobalPositions{
         STARTING
