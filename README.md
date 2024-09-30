@@ -31,4 +31,5 @@
 
 `wait_for_start()`得到开始指令后返回
 
+`annouce(message)`广播`message`
 
