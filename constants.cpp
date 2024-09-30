@@ -1,6 +1,3 @@
-#include <string>
-
-
 namespace items{
     enum FridgeItems{
         RED_CAN,
