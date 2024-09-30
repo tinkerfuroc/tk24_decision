@@ -1,5 +1,7 @@
+// using enum class constants in c++: items::FridgeItems::RED_CAN
+
 namespace items{
-    enum FridgeItems{
+    enum class FridgeItems{
         RED_CAN,
         BLUE_CAN,
         GREEN_CAN,
@@ -8,7 +10,7 @@ namespace items{
         FRUIT
     };
 
-    enum TrashItems{
+    enum class TrashItems{
         CLEAR_BOTTLE,
         PLASTIC_BAG,
         RED_PAPER_BALL,
@@ -21,33 +23,33 @@ namespace items{
 }
 
 namespace tinker_pos{
-    enum GlobalPositions{
+    enum class GlobalPositions{
         STARTING
     };
 
-    enum FridgeGraspPositions{
+    enum class FridgeGraspPositions{
         LEFT,
         MIDDLE,
         RIGHT
     };
 
-    enum FridgeManeuverPositions{
+    enum class FridgeManeuverPositions{
         OPEN_DOOR,
         SCANNING
     };
 
-    enum TrashManeuverPositions{
+    enum class TrashManeuverPositions{
         SCANNING,
         THROW_TRASH
     };
 }
 
 namespace arm_pos{
-    enum GlobalPositons{
+    enum class GlobalPositons{
         RESTING,
     };
 
-    enum ScanningPositions{
+    enum class ScanningPositions{
         FRIDGE,
         GROUND
     };
