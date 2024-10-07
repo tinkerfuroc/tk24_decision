@@ -1,7 +1,11 @@
 # tk24_decision
 中关村仿生智能大赛上层代码
 
+
+
 ## 接口
+各个所需函数提供一个ROS2 Service接口，返回message中包含 `int32 status` 关键字，成功即为0，其它情况返回error code（请在各自的文档中说明！）谢谢大家。
+
 ### 导航：
 `is_at(pos)` 返回机器人是否已经在`pos`的位置
 
