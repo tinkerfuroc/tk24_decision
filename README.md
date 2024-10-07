@@ -2,9 +2,9 @@
 中关村仿生智能大赛上层代码
 
 
-
 ## 接口
-各个所需函数提供一个ROS2 Service接口，返回message中包含 `int32 status` 关键字，成功即为0，其它情况返回error code（请在各自的文档中说明！）谢谢大家。
+各个所需函数提供一个ROS2 Service接口，返回reponse中包含 `int32 status` 关键字，成功即为0，其它情况返回error code（请在各自的文档中说明！）谢谢大家。
+麻烦各组统一一下message的类型，谢谢～
 
 ### 导航：
 `is_at(pos)` 返回机器人是否已经在`pos`的位置
@@ -33,7 +33,7 @@
 ### 语音
 `get_grasp_target()`返回要抓取的`category`
 
-`wait_for_start()`得到开始指令后返回
+`wait_for_start()`得到任务开始指令后返回
 
-`annouce(message)`广播`message`
+`annouce(message)`语音广播`message`，结束/失败后返回
 
