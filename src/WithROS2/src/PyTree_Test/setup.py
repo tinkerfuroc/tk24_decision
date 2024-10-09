@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'service = py_srvcli.Service_ScanFor:main'
+            'service = PyTree_Test.Service_ScanFor:main',
+            'main = PyTree_Test.main:main'
         ],
     },
 )

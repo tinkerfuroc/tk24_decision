@@ -42,7 +42,7 @@ class ServiceHandler(pytree.behaviour.Behaviour):
             raise KeyError(error_message) from e  # 'direct cause' traceability
 
         self.client = self.node.create_client(self.service_type, self.service_name)
-        while not self.cli.wait_for_service(timeout_sec=1.0):
+        while not self.client.wait_for_service(timeout_sec=1.0):
             self.logger.debug('service not available, waiting again...')
     
     def initialise(self):
@@ -53,7 +53,7 @@ class ServiceHandler(pytree.behaviour.Behaviour):
         
 
 # behavior mocking the actual vision scanning
-class ScanFor(ServiceHandler):
+class Bt_node_scanfor(ServiceHandler):
 
     def __init__(self, 
                  name: str,
@@ -62,7 +62,7 @@ class ScanFor(ServiceHandler):
         """
         executed when creating tree diagram, therefor very minimal
         """
-        super(ScanFor, self).__init__(name, "scan_for", ScanFor)
+        super(Bt_node_scanfor, self).__init__(name, "scan_for", ScanFor)
         self.object = goal_object
 
 
@@ -70,7 +70,7 @@ class ScanFor(ServiceHandler):
         """
         setup for the node, recursively called with tree.setup()
         """
-        ServiceHandler.setup(self, kwargs)
+        ServiceHandler.setup(self, **kwargs)
 
         # attaches a blackboard (more like a shared memory section with key-value pair references) under the namespace Locations
         self.bb_client = self.attach_blackboard_client(name=f"ScanFor{self.object}", namespace="Locations")
@@ -87,7 +87,7 @@ class ScanFor(ServiceHandler):
         request = ScanFor.Request()
         request.name = self.object
         # setup things that needs to be cleared
-        self.response = self.node.call_async(request)
+        self.response = self.client.call_async(request)
 
         self.bb_client.set(self.object, Location(), overwrite=True)
         self.feedback_message = f"Initialized ScanFor {self.object}"
@@ -95,7 +95,7 @@ class ScanFor(ServiceHandler):
     def update(self):
         self.logger.debug(f"Update ScanFor {self.object}")
         if self.response.done():
-            if self.response.status == 0:
+            if self.response.result().status == 0:
                 location = Location()
                 location.direction = "FRONT"
                 location.distance = 5
@@ -117,10 +117,17 @@ class GotoObject(pytree.behaviour.Behaviour):
         self.object = goal_object
 
         self.counter = 1
+        self.node = None
 
-    def setup(self):
+    def setup(self, **kwargs):
         self.client = self.attach_blackboard_client(name=f"Goto{self.object}", namespace="Locations")
         self.client.register_key(self.object, access=pytree.common.Access.READ)
+
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.name, self.__class__.__name__)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
 
         self.logger.debug(f"Setup GotoObject {self.object}")
     
