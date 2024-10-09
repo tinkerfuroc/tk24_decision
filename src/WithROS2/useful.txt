@@ -1,0 +1,2 @@
+py_trees_ros.subscribers.ToBlackboard
+- writes first message from topic to blackboard
