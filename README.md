@@ -3,7 +3,7 @@
 
 
 ## 接口
-各个所需函数提供一个ROS2 Service接口，返回reponse中包含 `int32 status` 关键字，成功即为0，其它情况返回error code（请在各自的文档中说明！）谢谢大家。
+各个所需函数提供一个ROS2 Service接口，返回reponse中包含 `int32 status`和`string error_msg` 关键字，成功即为0，其它情况返回error code（请在各自的文档中说明和附加对应的error_msg！）谢谢大家。
 麻烦各组统一一下message的类型，谢谢～
 
 ### 导航：
