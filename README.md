@@ -21,13 +21,15 @@
 
 
 ### 抓取
-`move_arm_to(arm_pos)`将机械笔移动到`arm_pos`，成功返回`True`，失败（无法规划、发生碰撞）返回`False`
+`move_arm_to(arm_pos)`将机械臂移动到`arm_pos`，成功返回`True`，失败（无法规划、发生碰撞）返回`False`
 
-`grasp_obj(mask, point_cloud)`根据点云抓取mask的物品
+`move_arm_joint(joint_pos)`将机械臂的关节移动到预设的角度（一般用于恢复原样）
+
+`get_grasp_pos(mask, point_cloud) -> arm_pos`根据点云分分割返回抓取位姿
+
+`move_gripper(Open)` 打开/闭合夹爪
 
 `grasped_obj(category)`确认是否成功抓取（物品在夹爪中）
-
-`drop()`松开夹爪，放开物品使其跌落，如果物品已经不在爪子中，返回`True`，否则返回`False`
 
 
 ### 语音
