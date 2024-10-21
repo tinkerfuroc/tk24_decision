@@ -1,5 +1,6 @@
 import py_trees
 import threading
+from rclpy.node import Node
 from typing import Any
 
 class ServiceHandler(py_trees.behaviour.Behaviour):
@@ -13,13 +14,13 @@ class ServiceHandler(py_trees.behaviour.Behaviour):
         self.service_type = service_type
 
         self.data_guard = threading.Lock()
-        self.node = None
+        self.node : Node = None
         self.response = None
         self.client = None
     
     def setup(self, **kwargs):
         try:
-            self.node = kwargs['node']
+            self.node : Node = kwargs['node']
         except KeyError as e:
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.name, self.__class__.__name__)
             raise KeyError(error_message) from e  # 'direct cause' traceability
