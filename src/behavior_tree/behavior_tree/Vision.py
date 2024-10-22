@@ -13,11 +13,12 @@ class BtNode_ScanFor(ServiceHandler):
                  bb_source,
                  bb_namespace: str,
                  bb_key:str,
+                 service_name : str = "scan_for"
                  ):
         """
         executed when creating tree diagram, therefor very minimal
         """
-        super(BtNode_ScanFor, self).__init__(name, "scan_for", ScanFor)
+        super(BtNode_ScanFor, self).__init__(name, service_name, ScanFor)
         self.bb_namespace = bb_namespace
         self.bb_key = bb_key
         self.bb_source = bb_source
@@ -80,11 +81,12 @@ class BtNode_FindObj(ServiceHandler):
                  bb_source,
                  bb_namespace: str,
                  bb_key:str,
+                 service_name:str = "find_obj"
                  ):
         """
         executed when creating tree diagram, therefor very minimal
         """
-        super(BtNode_ScanFor, self).__init__(name, "find_obj", ScanFor)
+        super(BtNode_ScanFor, self).__init__(name, service_name, ScanFor)
         self.bb_namespace = bb_namespace
         self.bb_key = bb_key
         self.bb_source = bb_source
@@ -136,5 +138,5 @@ class BtNode_FindObj(ServiceHandler):
                 self.feedback_message = f"Find Obj for {self.object} failed"
                 return pytree.common.Status.FAILURE
         else:
-            self.feedback_message = "Still scanning..."
+            self.feedback_message = "Still finding obj..."
             return pytree.common.Status.RUNNING
