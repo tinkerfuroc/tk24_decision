@@ -1,0 +1,4 @@
+string announcement_msg
+---
+int32 status
+string error_msg
