@@ -10,10 +10,11 @@ class BtNode_ScanFor(ServiceHandler):
 
     def __init__(self, 
                  name: str,
-                 bb_source,
+                 bb_source: str,
                  bb_namespace: str,
                  bb_key:str,
-                 service_name : str = "scan_for"
+                 service_name : str = "scan_for",
+                 object: str = None,
                  ):
         """
         executed when creating tree diagram, therefor very minimal
@@ -22,7 +23,7 @@ class BtNode_ScanFor(ServiceHandler):
         self.bb_namespace = bb_namespace
         self.bb_key = bb_key
         self.bb_source = bb_source
-        self.object = None
+        self.object = object
 
 
     def setup(self, **kwargs):
@@ -30,27 +31,30 @@ class BtNode_ScanFor(ServiceHandler):
         setup for the node, recursively called with tree.setup()
         """
         ServiceHandler.setup(self, **kwargs)
-
-        self.bb_read_client = self.attach_blackboard_client(name="ScanFor Read")
-        self.bb_read_client.register_key(self.bb_source, access=pytree.common.Access.READ)
-
         # attaches a blackboard (more like a shared memory section with key-value pair references) under the namespace Locations
         self.bb_write_client = self.attach_blackboard_client(name=f"ScanFor", namespace=self.bb_namespace)
          # register a key with the name of the object, with this client having write access
         self.bb_write_client.register_key(self.bb_key, access=pytree.common.Access.WRITE)
 
-        # debugger info (shown with DebugVisitor)
-        self.logger.debug(f"Setup ScanFor, reading from {self.bb_source}")
+        if not self.object:
+            self.bb_read_client = self.attach_blackboard_client(name="ScanFor Read")
+            self.bb_read_client.register_key(self.bb_source, access=pytree.common.Access.READ)
+
+            # debugger info (shown with DebugVisitor)
+            self.logger.debug(f"Setup ScanFor, reading from {self.bb_source}")
+        else:
+            self.logger.debug(f"Setup ScanFor, for {self.object}")
 
     def initialise(self) -> None:
         """
         Called when the node is visited
         """
-        try:
-            self.object = self.bb_read_client.get(self.bb_source)
-        except Exception as e:
-            self.feedback_message = f"ScanFor reading object name failed"
-            raise e
+        if not self.object:
+            try:
+                self.object = self.bb_read_client.get(self.bb_source)
+            except Exception as e:
+                self.feedback_message = f"ScanFor reading object name failed"
+                raise e
 
         request = ScanFor.Request()
         request.name = self.object
@@ -67,7 +71,7 @@ class BtNode_ScanFor(ServiceHandler):
                 self.feedback_message = f"Found object, stored to blackboard {self.bb_namespace} / {self.bb_key}"
                 return pytree.common.Status.SUCCESS
             else:
-                self.feedback_message = f"Scanning for {self.object} failed"
+                self.feedback_message = f"Scanning for {self.object} failed with error code {self.response.result().status}: {self.response.result().error_msg}"
                 return pytree.common.Status.FAILURE
         else:
             self.feedback_message = "Still scanning..."
@@ -86,7 +90,7 @@ class BtNode_FindObj(ServiceHandler):
         """
         executed when creating tree diagram, therefor very minimal
         """
-        super(BtNode_ScanFor, self).__init__(name, service_name, ScanFor)
+        super(BtNode_FindObj, self).__init__(name, service_name, ScanFor)
         self.bb_namespace = bb_namespace
         self.bb_key = bb_key
         self.bb_source = bb_source
@@ -135,7 +139,7 @@ class BtNode_FindObj(ServiceHandler):
                 self.feedback_message = f"Found object, stored to blackboard {self.bb_namespace} / {self.bb_key}"
                 return pytree.common.Status.SUCCESS
             else:
-                self.feedback_message = f"Find Obj for {self.object} failed"
+                self.feedback_message = f"Find Obj for {self.object} failed with error code {self.response.result().status}: {self.response.result().error_msg}"
                 return pytree.common.Status.FAILURE
         else:
             self.feedback_message = "Still finding obj..."

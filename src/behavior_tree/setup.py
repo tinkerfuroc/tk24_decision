@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'main = behavior_tree.main:main'
         ],
     },
 )
