@@ -1,0 +1,6 @@
+string prompt
+
+---
+
+int32 status
+string error_msg

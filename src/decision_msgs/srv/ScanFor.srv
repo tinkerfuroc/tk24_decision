@@ -1,5 +1,0 @@
-string name
----
-int32 status
-std_msgs/Header header
-# tinker_vision_msgs/Object[] objects

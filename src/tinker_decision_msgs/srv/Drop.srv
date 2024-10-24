@@ -1,0 +1,5 @@
+geometry_msgs/PointStamped bin_point
+
+---
+int32 status
+string error_msg
