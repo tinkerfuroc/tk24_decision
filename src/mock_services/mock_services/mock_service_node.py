@@ -4,6 +4,8 @@ import rclpy
 from rclpy.node import Node
 
 from tinker_decision_msgs.srv import Announce, Drop, Goto, GotoGrasp, Grasp, ObjectDetection, WaitForStart
+from tinker_vision_msgs.msg import Object
+from sensor_msgs.msg import Image
 from std_msgs.msg import Header
 
 
@@ -20,7 +22,7 @@ class Services(Enum):
 
 class MockServices(Node):
     def __init__(self) -> None:
-        super().__init__("mock services")
+        super().__init__("mock_services")
 
         if Services.ANNOUNCE:
             self.announce = self.create_service(Announce, "announce", self.announce_callback)
@@ -39,7 +41,11 @@ class MockServices(Node):
     
     def announce_callback(self, request, response):
         self.get_logger().info(f'Incoming announcement request for message: {request.announcement_msg}')
-        response.status = 0
+        if request.announcement_msg:
+            response.status = 0
+        else:
+            response.status = 1
+            response.error_msg = "Error, no announcement message sent"
 
         return response
 
@@ -79,18 +85,30 @@ class MockServices(Node):
     def obj_detection_callback(self, request, response):
         self.get_logger().info(f'Incoming object detection request for prompt {request.prompt}')
 
-        if 'scan' in self.request.flags:
+        if 'scan' in request.flags:
             response.status = 0
             response.header = Header()
             response.header.frame_id = ""
             response.header.stamp.sec = 0
             response.header.stamp.nanosec = 1
 
-            # TODO: add a return object
-            response.header.objects = []
-        if 'find_for_grasp' in self.request.flags:
+            response.objects = []
+            object = Object()
+            response.objects.append(object)
+        elif 'find_for_grasp' in request.flags:
             # TODO: add return stuff
-            pass
+            response.status = 0
+            response.rgb_image = Image()
+            response.depth_image = Image()
+            response.segments = []
+            response.segments.append(Image())
+
+        else:
+            self.get_logger().info(f"Error: no valid flags passed! (flags: {request.flags})")
+            response.status = 1
+            response.error_msg = "No valid flags passed"
+
+        return response
 
 
     def wait_for_start_callback(self, request, response):
