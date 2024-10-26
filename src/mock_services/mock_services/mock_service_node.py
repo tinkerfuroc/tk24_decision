@@ -11,7 +11,7 @@ from std_msgs.msg import Header
 from geometry_msgs.msg import PointStamped, PoseStamped
 
 
-# modify to decide which service to mock
+# modify to decide which services to mock
 class Services(Enum):
     ANNOUNCE = True
     DROP = True
