@@ -1,7 +1,7 @@
 import py_trees as pytree
 import py_trees_ros as pytree_ros
 
-from decision_msgs.srv import ScanFor, FindObj
+from tinker_decision_msgs.srv import ObjectDetection
 
 from .BaseBehaviors import ServiceHandler
 
@@ -13,13 +13,13 @@ class BtNode_ScanFor(ServiceHandler):
                  bb_source: str,
                  bb_namespace: str,
                  bb_key:str,
-                 service_name : str = "scan_for",
+                 service_name : str = "object_detection",
                  object: str = None,
                  ):
         """
         executed when creating tree diagram, therefor very minimal
         """
-        super(BtNode_ScanFor, self).__init__(name, service_name, ScanFor)
+        super(BtNode_ScanFor, self).__init__(name, service_name, ObjectDetection)
         self.bb_namespace = bb_namespace
         self.bb_key = bb_key
         self.bb_source = bb_source
@@ -52,12 +52,14 @@ class BtNode_ScanFor(ServiceHandler):
         if not self.object:
             try:
                 self.object = self.bb_read_client.get(self.bb_source)
+                assert isinstance(self.object, str)
             except Exception as e:
                 self.feedback_message = f"ScanFor reading object name failed"
                 raise e
 
-        request = ScanFor.Request()
-        request.name = self.object
+        request = ObjectDetection.Request()
+        request.prompt = self.object
+        request.flags = "scan"
         # setup things that needs to be cleared
         self.response = self.client.call_async(request)
 
@@ -85,12 +87,12 @@ class BtNode_FindObj(ServiceHandler):
                  bb_source,
                  bb_namespace: str,
                  bb_key:str,
-                 service_name:str = "find_obj"
+                 service_name:str = "object_detection"
                  ):
         """
         executed when creating tree diagram, therefor very minimal
         """
-        super(BtNode_FindObj, self).__init__(name, service_name, ScanFor)
+        super(BtNode_FindObj, self).__init__(name, service_name, ObjectDetection)
         self.bb_namespace = bb_namespace
         self.bb_key = bb_key
         self.bb_source = bb_source
@@ -120,12 +122,14 @@ class BtNode_FindObj(ServiceHandler):
         """
         try:
             self.object = self.bb_read_client.get(self.bb_source)
+            assert isinstance(self.object, str)
         except Exception as e:
             self.feedback_message = f"FindObj reading object name failed"
             raise e
 
-        request = FindObj.Request()
-        request.name = self.object
+        request = ObjectDetection.Request()
+        request.prompt = self.object
+        request.flags = "find_for_grasp"
         # setup things that needs to be cleared
         self.response = self.client.call_async(request)
 

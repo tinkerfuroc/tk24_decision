@@ -36,6 +36,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/Goto.srv"
   "srv/Grasp.srv"
   "srv/ObjectDetection.srv"
+  "srv/RelToAbs.srv"
   "srv/WaitForStart.srv"
   DEPENDENCIES geometry_msgs std_msgs sensor_msgs tinker_vision_msgs
 )

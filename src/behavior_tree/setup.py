@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'main = behavior_tree.main:main'
+            'main = behavior_tree.main:pick_up_trash',
+            'draw = behavior_tree.main:draw_pick_up_trash'
         ],
     },
 )
