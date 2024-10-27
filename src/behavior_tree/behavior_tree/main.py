@@ -5,6 +5,9 @@ import rclpy
 
 from .PickUpTrash.PickUpTrash import createPickUpTrashTree
 
+PRINT_BLACKBOARD = True
+PRINT_DEBUG = False
+
 
 def draw_pick_up_trash():
     """
@@ -29,7 +32,11 @@ def pick_up_trash():
     # function for display the tree to standard output
     def print_tree(tree):
         print(py_trees.display.unicode_tree(root=tree.root, show_status=True))
-    
+        if PRINT_BLACKBOARD:
+            print(py_trees.display.unicode_blackboard())
+
+    if PRINT_DEBUG:
+        py_trees.logging.level = py_trees.logging.Level.DEBUG
     
     tree.tick_tock(period_ms=500.0,post_tick_handler=print_tree)
 
