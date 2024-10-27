@@ -15,6 +15,8 @@ from .BtNodes import BtNode_ScanAndSave
 
 # TODO: replace with actual pose of the 1m place
 pose_1m = PoseStamped()
+
+# TODO: replace with actual relative pose of turning 90 degrees
 pose_turn90 = PoseStamped()
 
 
@@ -22,7 +24,7 @@ pose_turn90 = PoseStamped()
 PROMPT_ALL = "clear bottle . wrinkled paper . can"
 PROMPT_TRASH_BIN = "trash bin"
 
-# service names (matching the mocked service, please prioritize changing the service names in your own node INSTEAD of than changing them here)
+# service names (matching the mocked services, please prioritize changing the service names in your own node INSTEAD of changing them here)
 SRV_ANNOUNCE = "announce"
 SRV_DROP = "drop"
 SRV_GOTO = "goto"
