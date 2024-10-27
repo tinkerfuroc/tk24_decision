@@ -43,8 +43,9 @@ class ServiceHandler(py_trees.behaviour.Behaviour):
         self.logger.debug("%s.initialise()" % self.__class__.__name__)
         # clear data
         with self.data_guard:
-            if self.clearing_policy == py_trees.common.ClearingPolicy.ON_INITIALISE:
-                self.msg = None
+            self.msg = None
+            # if self.clearing_policy == py_trees.common.ClearingPolicy.ON_INITIALISE:
+            #     self.msg = None
 
 
 class BtNode_WriteToBlackboard(py_trees.behaviour.Behaviour):
