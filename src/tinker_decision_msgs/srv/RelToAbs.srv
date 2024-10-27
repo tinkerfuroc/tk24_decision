@@ -1,0 +1,10 @@
+# "point" for converting PointStamped and "pose" for converting PoseStamped
+string flags
+geometry_msgs/PointStamped point_rel
+geometry_msgs/PoseStamped pose_rel
+---
+int32 status
+string error_msg
+
+geometry_msgs/PointStamped point_abs
+geometry_msgs/PoseStamped pose_abs

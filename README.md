@@ -3,39 +3,14 @@
 
 
 ## 接口
-各个所需函数提供一个ROS2 Service接口，返回reponse中包含 `int32 status`和`string error_msg` 关键字，成功即为0，其它情况返回error code（请在各自的文档中说明和附加对应的error_msg！）谢谢大家。
-麻烦各组统一一下message的类型，谢谢～
+请见飞书文档（https://gqz316bkyzz.feishu.cn/wiki/LFZTwm88sikbVfkR8RScQovkn7c?from=from_copylink）
 
-### 导航：
-`is_at(pos)` 返回机器人是否已经在`pos`的位置
+## build
+需先build `tinker_vision_msgs`再build此目录。
 
-`goto(pos)` 前往`pos`位置，成功到达返回`True`，无法到达（障碍物遮挡、发生碰撞）返回`False`
+## 运行
+使用`ros2 run mock_services mock_services`运行模拟的service（可通过更改`mock_service_node.py`中的变量设置希望模拟哪些service，且可以通过更改每个callback的具体返回值为行为树输入指定的变量值）
 
-`goto_facing(pos, distance)` 使机器人到达面向`pos`位置距离其`distance`（米）的位置，成功到达返回`True`，无法到达（障碍物遮挡、发生碰撞）返回`False`
+之后个，可使用`ros2 run behavior_tree main`运行现有的捡垃圾任务行为树（可通过更改`PickUpTrash.py`中顶端的变量改变连接的service名称），或`ros2 run behavior_tree draw`绘制行为树的可视化结构。
 
-
-### 视觉
-`scan_for(categories)`使用顶置相机寻找`categories`（list[str])类的物品，根据距离远近依次返回质心相对机器人位置和具体的category
-
-`find_obj(category)`使用臂上相机寻找该`category`的物品，返回距离最近的分割mask和整个点云图（透明物体可根据计算对点云图进行修改）
-
-
-### 抓取
-`move_arm_to(arm_pos)`将机械臂移动到`arm_pos`，成功返回`True`，失败（无法规划、发生碰撞）返回`False`
-
-`move_arm_joint(joint_pos)`将机械臂的关节移动到预设的角度（一般用于恢复原样）
-
-`get_grasp_pos(mask, point_cloud) -> arm_pos`根据点云分分割返回抓取位姿
-
-`move_gripper(Open)` 打开/闭合夹爪
-
-`grasped_obj(category)`确认是否成功抓取（物品在夹爪中）
-
-
-### 语音
-`get_grasp_target()`返回要抓取的`category`
-
-`wait_for_start()`得到任务开始指令后返回
-
-`annouce(message)`语音广播`message`，结束/失败后返回
-
+另可通过更改`main.py`中`tree.tick_tock(period_ms=500.0,post_tick_handler=print_tree)`中的`period_ms`改变行为树每个tick间隔的时间。

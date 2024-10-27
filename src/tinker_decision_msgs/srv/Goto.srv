@@ -1,0 +1,6 @@
+# whether it is relative or absolute is given in the header
+geometry_msgs/PoseStamped target 
+
+---
+int32 status
+string error_msg

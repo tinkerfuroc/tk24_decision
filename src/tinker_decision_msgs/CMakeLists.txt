@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(decision_msgs)
+project(tinker_decision_msgs)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -13,7 +13,7 @@ find_package(ament_cmake REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
+  # the following line skips the linter which schecks for copyrights
   # comment the line when a copyright and license is added to all source files
   set(ament_cmake_copyright_FOUND TRUE)
   # the following line skips cpplint (only works in a git repo)
@@ -23,13 +23,22 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-# find_package(geometry_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(tinker_vision_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-
-  # "srv/ScanFor.srv"
-  # DEPENDENCIES geometry_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
+  "srv/Announce.srv"
+  "srv/Drop.srv"
+  "srv/GotoGrasp.srv"
+  "srv/Goto.srv"
+  "srv/Grasp.srv"
+  "srv/ObjectDetection.srv"
+  "srv/RelToAbs.srv"
+  "srv/WaitForStart.srv"
+  DEPENDENCIES geometry_msgs std_msgs sensor_msgs tinker_vision_msgs
 )
 
 ament_package()

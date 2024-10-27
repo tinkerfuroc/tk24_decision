@@ -1,0 +1,28 @@
+string prompt
+
+# Used to set options, empty by default:
+# - 'scan' : use top camera to scan for all that matches prompt, and return in order of distance to Tinker
+# - 'find_for_grasp' : use arm camera to find all that matches prompt, and return with (modifiedd) point depth image
+#
+# Example: 'scan'
+string flags
+---
+
+### Always return
+int32 status
+string error_msg
+
+### if 'scan'
+std_msgs/Header header
+tinker_vision_msgs/Object[] objects
+
+### if 'find_for_grasp'
+# Raw RGB image in BGR8 format, if 'request_image' flag is set.
+sensor_msgs/Image rgb_image
+# Raw depth image in 32FC1 format (in meters), if 'request_image' flag is set.
+sensor_msgs/Image depth_image
+# Segments of each object in 8UC1 format, if 'request_segments' flag is set.
+sensor_msgs/Image[] segments
+
+### Currently unneeded return parameters
+int32 person_id
