@@ -1,17 +1,14 @@
 import py_trees as pytree
 
-from enum import Enum
-
 from geometry_msgs.msg import PointStamped, PoseStamped
-
 
 from behavior_tree.TemplateNodes.Vision import BtNode_FindObj, BtNode_ScanFor
 from behavior_tree.TemplateNodes.Manipulation import BtNode_Grasp, BtNode_Drop
 from behavior_tree.TemplateNodes.Audio import BtNode_Announce, BtNode_WaitForStart
 from behavior_tree.TemplateNodes.Navigation import BtNode_Goto, BtNode_GotoGrasp, BtNode_RelToAbs
 
-from .BtNodes import BtNode_ScanAndSave
-
+from .CustomBtNodes import BtNode_ScanAndSave
+from behavior_tree.Constants import *
 
 # TODO: replace with actual pose of the 1m place
 pose_1m = PoseStamped()
@@ -19,28 +16,15 @@ pose_1m = PoseStamped()
 # TODO: replace with actual relative pose of turning 90 degrees
 pose_turn90 = PoseStamped()
 
-
 # prompts (subject to change)
 PROMPT_ALL = "clear bottle . wrinkled paper . can"
 PROMPT_TRASH_BIN = "trash bin"
-
-# service names (matching the mocked services, please prioritize changing the service names in your own node INSTEAD of changing them here)
-SRV_ANNOUNCE = "announce"
-SRV_DROP = "drop"
-SRV_GOTO = "goto"
-SRV_GOTO_GRASP = "goto_grasp"
-SRV_GRASP = "grasp"
-SRV_OBJ_DETECTION = "object_detection"
-SRV_REL_TO_ABS = "rel_to_abs"
-SRV_WAIT_FOR_START = "wait_for_start"
-    
 
 # blackboard key constants (do NOT change!)
 KEY_POINT_BIN_ABS = "point_bin_abs"
 KEY_POINT_BIN_REL = "point_bin_relative"
 KEY_POINT_TRASH = "point_trash"
 KEY_TYPE_TRASH = "type_trash"
-
 
 
 def createSearchForBin() -> pytree.composites.Sequence:

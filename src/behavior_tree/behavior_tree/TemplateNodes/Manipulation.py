@@ -7,6 +7,9 @@ from .BaseBehaviors import ServiceHandler
 
 
 class BtNode_Grasp(ServiceHandler):
+    """
+    Node for grasping an object with a specific prompt
+    """
     def __init__(self, 
                  name: str,
                  bb_source: str,
@@ -15,6 +18,12 @@ class BtNode_Grasp(ServiceHandler):
                  ):
         """
         executed when creating tree diagram, therefor very minimal
+
+        Args:
+            name: name of the node (to be displayed in the tree)
+            bb_source: blackboard key to a str prompt
+            service_name: name of the service running Grasp
+            prompt: optional, if given, skips reading from blackboard
         """
         super(BtNode_Grasp, self).__init__(name, service_name, Grasp)
         self.bb_source = bb_source
