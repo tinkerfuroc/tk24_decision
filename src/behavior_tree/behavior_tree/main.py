@@ -6,7 +6,7 @@ import rclpy
 from .PickUpTrash.PickUpTrash import createPickUpTrashTree
 
 PRINT_BLACKBOARD = True
-PRINT_DEBUG = False
+PRINT_DEBUG = True
 
 
 def draw_pick_up_trash():
