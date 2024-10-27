@@ -1,6 +1,5 @@
 import py_trees as pytree
 from py_trees.common import Status
-import py_trees_ros as pytree_ros
 
 from tinker_decision_msgs.srv import Announce, WaitForStart
 
