@@ -5,6 +5,20 @@
 ## 接口
 请见飞书文档（https://gqz316bkyzz.feishu.cn/wiki/LFZTwm88sikbVfkR8RScQovkn7c?from=from_copylink）
 
+## 环境
+PyTrees安装：
+```
+pip install py-trees
+```
+
+Pytree ROS安装：
+```
+$ sudo apt install \
+    ros-humble-py-trees \
+    ros-humble-py-trees-ros-interfaces \
+    ros-humble-py-trees-ros
+```
+
 ## build
 需先build `tinker_vision_msgs`再build此目录。
 
