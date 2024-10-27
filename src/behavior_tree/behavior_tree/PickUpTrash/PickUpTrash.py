@@ -1,9 +1,6 @@
 import py_trees as pytree
 
-from enum import Enum
-
 from geometry_msgs.msg import PointStamped, PoseStamped
-
 
 from behavior_tree.TemplateNodes.Vision import BtNode_FindObj, BtNode_ScanFor
 from behavior_tree.TemplateNodes.Manipulation import BtNode_Grasp, BtNode_Drop

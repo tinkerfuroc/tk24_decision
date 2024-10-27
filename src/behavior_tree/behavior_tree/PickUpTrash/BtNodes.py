@@ -30,13 +30,17 @@ class BtNode_ScanAndSave(BtNode_ScanFor):
             if self.response.result().status == 0:
                 self.bb_write_client.set(self.bb_key, self.response.result(), overwrite=True)
                 if self.response.result().objects:
+                    # create a PointStamped object based on the returned header and point
                     point_stamped = PointStamped()
                     point_stamped.point = self.response.result().objects[0].centroid
                     point_stamped.header = self.response.result().header
+
+                    # store the PointStamped and the type to the given blackboard keys
                     self.bb_point_client.set(self.bb_key_point, point_stamped, overwrite=True)
                     self.bb_point_client.set(self.bb_key_type, self.response.result().objects[0].cls, overwrite=True)
-
-                    self.feedback_message = f"Found objects, first object's centroid stored to {self.bb_key_point}, type stored to {self.bb_key_type}"
+                    
+                    # update feedback message
+                    self.feedback_message = f"Found objects, first object's centroid s  tored to {self.bb_key_point}, type stored to {self.bb_key_type}"
                     return py_trees.common.Status.SUCCESS
                 else:
                     self.feedback_message = f"Response does not contain an object"

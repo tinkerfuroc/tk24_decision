@@ -5,6 +5,9 @@ from rclpy.node import Node
 from typing import Any
 
 class ServiceHandler(py_trees.behaviour.Behaviour):
+    """
+    Base class for all nodes which handle a service
+    """
     def __init__(self, 
                  name: str,
                  service_name:str,
@@ -14,24 +17,31 @@ class ServiceHandler(py_trees.behaviour.Behaviour):
         self.service_name = service_name
         self.service_type = service_type
 
+        # guard the data
         self.data_guard = threading.Lock()
+
         self.node : Node = None
-        self.response = None
-        self.client = None
+
+        self.response = None    # Future object for receiving response
+        self.client = None      # service client
     
     def setup(self, **kwargs):
+        # node should be passed down the tree from the root node
         try:
             self.node : Node = kwargs['node']
         except KeyError as e:
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.name, self.__class__.__name__)
             raise KeyError(error_message) from e  # 'direct cause' traceability
 
+        # create the service client and wait until it connects
         self.client = self.node.create_client(self.service_type, self.service_name)
         while not self.client.wait_for_service(timeout_sec=1.0):
             self.logger.debug('service not available, waiting again...')
     
     def initialise(self):
+        # some debugging info
         self.logger.debug("%s.initialise()" % self.__class__.__name__)
+        # clear data
         with self.data_guard:
             if self.clearing_policy == py_trees.common.ClearingPolicy.ON_INITIALISE:
                 self.msg = None

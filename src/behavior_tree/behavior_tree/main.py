@@ -7,14 +7,22 @@ from .PickUpTrash.PickUpTrash import createPickUpTrashTree
 
 
 def draw_pick_up_trash():
+    """
+    Draw the tree for the trash picking mission as a .png
+    """
     root = createPickUpTrashTree()
     py_trees.display.render_dot_tree(root, with_blackboard_variables=True)
 
 
 def pick_up_trash():
+    """
+    start the behavior tree for the trash picking mission
+    """
     rclpy.init(args=None)
 
     root = createPickUpTrashTree()
+
+    # make it a ros tree
     tree = py_trees_ros.trees.BehaviourTree(root)
     tree.setup(node_name="root_node", timeout=15)
 
