@@ -15,10 +15,10 @@ from geometry_msgs.msg import PointStamped, PoseStamped
 class Services(Enum):
     ANNOUNCE = True
     DROP = True
-    GOTO = True
+    GOTO = False
     GOTO_GRASP = True
     GRASP = True
-    OBJ_DETECTION = True
+    OBJ_DETECTION = False
     REL_TO_ABS = True
     WAIT_FOR_START = True
 

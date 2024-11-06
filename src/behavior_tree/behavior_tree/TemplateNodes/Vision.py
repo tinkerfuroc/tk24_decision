@@ -1,6 +1,7 @@
 import py_trees as pytree
 
-from tinker_decision_msgs.srv import ObjectDetection
+# from tinker_decision_msgs.srv import ObjectDetection
+from tinker_vision_msgs.srv import ObjectDetection
 
 from .BaseBehaviors import ServiceHandler
 
@@ -59,6 +60,7 @@ class BtNode_ScanFor(ServiceHandler):
         request = ObjectDetection.Request()
         request.prompt = self.object
         request.flags = "scan"
+        request.camera = "orbbec"
         # setup things that needs to be cleared
         self.response = self.client.call_async(request)
 
@@ -129,6 +131,7 @@ class BtNode_FindObj(ServiceHandler):
         request = ObjectDetection.Request()
         request.prompt = self.object
         request.flags = "find_for_grasp"
+        request.camera = "realsense"
         # setup things that needs to be cleared
         self.response = self.client.call_async(request)
 
