@@ -7,3 +7,6 @@ SRV_GRASP = "grasp"
 SRV_OBJ_DETECTION = "object_detection"
 SRV_REL_TO_ABS = "rel_to_abs"
 SRV_WAIT_FOR_START = "wait_for_start"
+
+PRINT_BLACKBOARD = True
+PRINT_DEBUG = True
