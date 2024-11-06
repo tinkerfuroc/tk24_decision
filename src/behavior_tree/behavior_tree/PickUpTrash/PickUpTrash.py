@@ -1,6 +1,7 @@
 import py_trees as pytree
 
-from geometry_msgs.msg import PointStamped, PoseStamped
+# from geometry_msgs.msg import PointStamped, PoseStamped
+from behavior_tree.messages import *
 
 from behavior_tree.TemplateNodes.Vision import BtNode_FindObj, BtNode_ScanFor
 from behavior_tree.TemplateNodes.Manipulation import BtNode_Grasp, BtNode_Drop
@@ -76,11 +77,13 @@ def pickAndDrop():
 
     goto_trash = BtNode_GotoGrasp("Got to trash point", KEY_POINT_TRASH, service_name=SRV_GOTO_GRASP)
 
-    grasp = BtNode_Grasp("Grasp trash", KEY_TYPE_TRASH, service_name=SRV_GRASP)
+    find_trash = BtNode_FindObj("find trash", KEY_TYPE_TRASH, "/", "trash", SRV_OBJ_DETECTION)
+
+    grasp = BtNode_Grasp("Grasp trash", "/trash", service_name=SRV_GRASP)
 
     drop = create_drop_node()
 
-    root.add_children([goto_trash, grasp, drop])
+    root.add_children([goto_trash, find_trash, grasp, drop])
 
     return root
 

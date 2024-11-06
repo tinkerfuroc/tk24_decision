@@ -1,4 +1,5 @@
-from geometry_msgs.msg import PointStamped, PoseStamped
+# from geometry_msgs.msg import PointStamped, PoseStamped
+from behavior_tree.messages import *
 import py_trees
 
 from behavior_tree.TemplateNodes.Vision import BtNode_ScanFor
@@ -55,5 +56,6 @@ class BtNode_ScanAndSave(BtNode_ScanFor):
         else:
             self.feedback_message = "Still scanning..."
             return py_trees.common.Status.RUNNING
+
 
 

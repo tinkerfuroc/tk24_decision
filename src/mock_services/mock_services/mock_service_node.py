@@ -15,10 +15,10 @@ from geometry_msgs.msg import PointStamped, PoseStamped
 class Services(Enum):
     ANNOUNCE = True
     DROP = True
-    GOTO = False
+    GOTO = True
     GOTO_GRASP = True
     GRASP = True
-    OBJ_DETECTION = False
+    OBJ_DETECTION = True
     REL_TO_ABS = True
     WAIT_FOR_START = True
 
@@ -85,9 +85,10 @@ class MockServices(Node):
         return response
 
     def grasp_callback(self, request, response):
-        self.get_logger().info(f'Incoming grasp request for prompt {request.prompt}')
+        self.get_logger().info(f'Incoming grasp request')
 
-        response.status = 0
+        response.success = True
+
         return response
 
     def obj_detection_callback(self, request, response):

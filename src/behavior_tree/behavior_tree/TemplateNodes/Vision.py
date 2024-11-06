@@ -1,7 +1,9 @@
 import py_trees as pytree
 
 # from tinker_decision_msgs.srv import ObjectDetection
-from tinker_vision_msgs.srv import ObjectDetection
+# from tinker_vision_msgs.srv import ObjectDetection
+
+from behavior_tree.messages import *
 
 from .BaseBehaviors import ServiceHandler
 

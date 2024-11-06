@@ -1,7 +1,9 @@
 import py_trees as pytree
 
-from tinker_decision_msgs.srv import Grasp, Drop
-from geometry_msgs.msg import PointStamped
+# from tinker_decision_msgs.srv import Grasp, Drop
+# from tinker_decision_msgs.srv import ObjectDetection
+# from geometry_msgs.msg import PointStamped
+from behavior_tree.messages import *
 
 from .BaseBehaviors import ServiceHandler
 
@@ -14,7 +16,6 @@ class BtNode_Grasp(ServiceHandler):
                  name: str,
                  bb_source: str,
                  service_name : str = "grasp",
-                 prompt: str = None
                  ):
         """
         executed when creating tree diagram, therefor very minimal
@@ -28,7 +29,6 @@ class BtNode_Grasp(ServiceHandler):
         super(BtNode_Grasp, self).__init__(name, service_name, Grasp)
         self.bb_source = bb_source
         self.bb_read_client = None
-        self.prompt = prompt
 
 
     def setup(self, **kwargs):
@@ -37,41 +37,42 @@ class BtNode_Grasp(ServiceHandler):
         """
         ServiceHandler.setup(self, **kwargs)
 
-        if self.prompt is None:
-            self.bb_read_client = self.attach_blackboard_client(name="Grasp Read")
-            self.bb_read_client.register_key(self.bb_source, access=pytree.common.Access.READ)
+        self.bb_read_client = self.attach_blackboard_client(name="Grasp Read")
+        self.bb_read_client.register_key(self.bb_source, access=pytree.common.Access.READ)
 
-            # debugger info (shown with DebugVisitor)
-            self.logger.debug(f"Setup Grasp, reading from {self.bb_source}")
-        else:
-            self.logger.debug(f"Setup Grasp, with givne prompt {self.prompt}")
+        # debugger info (shown with DebugVisitor)
+        self.logger.debug(f"Setup Grasp, reading from {self.bb_source}")
+        
 
     def initialise(self) -> None:
         """
         Called when the node is visited
         """
         try:
-            self.prompt = self.bb_read_client.get(self.bb_source)
-            assert isinstance(self.prompt, str)
+            vision_result = self.bb_read_client.get(self.bb_source)
+            assert isinstance(vision_result, ObjectDetection.Response)
         except Exception as e:
             self.feedback_message = f"Grasp reading object name failed"
             raise e
 
         request = Grasp.Request()
-        request.prompt = self.prompt
+        request.header = vision_result.header
+        request.rgb_image = vision_result.rgb_image
+        request.depth_image = vision_result.depth_image
+        request.segments = vision_result.segments
         # setup things that needs to be cleared
         self.response = self.client.call_async(request)
 
-        self.feedback_message = f"Initialized Grasp for prompt {self.prompt}"
+        self.feedback_message = f"Initialized Grasp"
 
     def update(self):
-        self.logger.debug(f"Update Grasp {self.prompt}")
+        self.logger.debug(f"Update Grasp")
         if self.response.done():
-            if self.response.result().status == 0:
+            if self.response.result().success:
                 self.feedback_message = f"Grasp Successful"
                 return pytree.common.Status.SUCCESS
             else:
-                self.feedback_message = f"Grasp failed with status {self.response.result().status}: {self.response.result().error_msg}"
+                self.feedback_message = f"Grasp failed with status {self.response.result().stage}: {self.response.result().error_msg}"
                 return pytree.common.Status.FAILURE
         else:
             self.feedback_message = "Still grasping..."

@@ -6,6 +6,8 @@ string prompt
 #
 # Example: 'scan'
 string flags
+
+string camera
 ---
 
 ### Always return

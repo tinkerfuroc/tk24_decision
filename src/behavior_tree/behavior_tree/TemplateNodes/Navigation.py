@@ -1,7 +1,9 @@
 import py_trees
 from .BaseBehaviors import ServiceHandler
-from tinker_decision_msgs.srv import Goto, GotoGrasp, RelToAbs
-from geometry_msgs.msg import PointStamped, PoseStamped
+# from tinker_decision_msgs.srv import Goto, GotoGrasp, RelToAbs
+# from geometry_msgs.msg import PointStamped, PoseStamped
+
+from behavior_tree.messages import *
 
 class BtNode_Goto(ServiceHandler):
     def __init__(self, 

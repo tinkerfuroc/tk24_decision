@@ -1,6 +1,12 @@
-string prompt
+# Keep it same as the response of ObjectDection now.
+std_msgs/Header header
+
+sensor_msgs/Image rgb_image
+sensor_msgs/Image depth_image
+sensor_msgs/Image[] segments
 
 ---
 
-int32 status
+bool success
+int16 stage           # 1 means error with graspnet, 
 string error_msg
