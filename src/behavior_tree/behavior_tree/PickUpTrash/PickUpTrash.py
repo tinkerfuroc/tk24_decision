@@ -71,6 +71,18 @@ def create_drop_node():
 
     return root
 
+def pickAndDrop():
+    root = pytree.composites.Sequence(name="pickup trash and drop", memory=True)
+
+    goto_trash = BtNode_GotoGrasp("Got to trash point", KEY_POINT_TRASH, service_name=SRV_GOTO_GRASP)
+
+    grasp = BtNode_Grasp("Grasp trash", KEY_TYPE_TRASH, service_name=SRV_GRASP)
+
+    drop = create_drop_node()
+
+    root.add_children([goto_trash, grasp, drop])
+
+    return root
 
 def searchAndPickupAtBin():
     root = pytree.composites.Sequence(name="Scan at trash can and pickup", memory=True)
@@ -80,19 +92,19 @@ def searchAndPickupAtBin():
 
     search = pytree.decorators.Retry(name="Keep Scanning and Turning", child=createScanAndTurn(), num_failures=4)
 
-    goto_trash = BtNode_GotoGrasp("Got to trash point", KEY_POINT_TRASH, service_name=SRV_GOTO_GRASP)
+    # goto_trash = BtNode_GotoGrasp("Got to trash point", KEY_POINT_TRASH, service_name=SRV_GOTO_GRASP)
 
-    grasp = BtNode_Grasp("Grasp trash", KEY_TYPE_TRASH, service_name=SRV_GRASP)
+    # grasp = BtNode_Grasp("Grasp trash", KEY_TYPE_TRASH, service_name=SRV_GRASP)
 
-    drop = create_drop_node()
+    # drop = create_drop_node()
 
-    root.add_children([goto_bin, search, goto_trash, grasp, drop])
+    pick_and_drop = pickAndDrop()
+
+    # root.add_children([goto_bin, search, goto_trash, grasp, drop])
+    root.add_children([goto_bin, search, pick_and_drop])
     
-    # root.add_child(pytree.behaviours.Failure("fail"))
 
     return pytree.decorators.Repeat(name="Seach and Pickup at Bin", child=root, num_success=9)
-    # return root
-    # return pytree.decorators.Repeat(name="Seach and Pickup at Bin", child=search, num_success=9)
 
 
 def searchAndPickupOutside():
@@ -102,13 +114,17 @@ def searchAndPickupOutside():
 
     scan = BtNode_ScanAndSave("Scan for trash", None, KEY_POINT_TRASH, KEY_TYPE_TRASH, service_name=SRV_OBJ_DETECTION, object=PROMPT_ALL)
     
-    goto_trash = BtNode_GotoGrasp("Got to trash point", KEY_POINT_TRASH, service_name=SRV_GOTO_GRASP)
+    # goto_trash = BtNode_GotoGrasp("Got to trash point", KEY_POINT_TRASH, service_name=SRV_GOTO_GRASP)
 
-    grasp = BtNode_Grasp("Grasp trash", KEY_TYPE_TRASH, service_name=SRV_GRASP)
+    # grasp = BtNode_Grasp("Grasp trash", KEY_TYPE_TRASH, service_name=SRV_GRASP)
 
-    drop = create_drop_node()
+    # drop = create_drop_node()
 
-    root.add_children([goto_1m_pos, scan, goto_trash, grasp, drop])
+    pick_and_drop = pickAndDrop()
+
+    # root.add_children([goto_1m_pos, scan, goto_trash, grasp, drop])
+
+    root.add_children([goto_1m_pos, scan, pick_and_drop])
     
     return pytree.decorators.Repeat(name="Seach and Pickup at Outside", child=root, num_success=9)
 
