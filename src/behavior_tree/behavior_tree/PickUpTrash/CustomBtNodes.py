@@ -56,6 +56,4 @@ class BtNode_ScanAndSave(BtNode_ScanFor):
         else:
             self.feedback_message = "Still scanning..."
             return py_trees.common.Status.RUNNING
-
-
-
+        

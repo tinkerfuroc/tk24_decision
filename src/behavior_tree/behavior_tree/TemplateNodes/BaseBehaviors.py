@@ -74,7 +74,7 @@ class BtNode_WriteToBlackboard(py_trees.behaviour.Behaviour):
          # register a key with the name of the object, with this client having write access
         self.bb_write_client.register_key(self.bb_key, access=py_trees.common.Access.WRITE)
 
-        if not self.object:
+        if self.object is None:
             self.bb_read_client = self.attach_blackboard_client(name="WriteToBlackboard")
             self.bb_read_client.register_key(self.bb_source, access=py_trees.common.Access.READ)
 
@@ -84,7 +84,7 @@ class BtNode_WriteToBlackboard(py_trees.behaviour.Behaviour):
             self.logger.debug(f"Setup Write to Blackboard, object already provided")
         
     def initialise(self) -> None:
-        if not self.object:
+        if self.object is None:
             try:
                 self.object = self.bb_read_client.get(self.bb_source)
             except Exception as e:

@@ -5,6 +5,7 @@ import rclpy
 from rclpy.node import Node
 
 from tinker_decision_msgs.srv import Announce, Drop, Goto, GotoGrasp, Grasp, ObjectDetection, RelToAbs, WaitForStart
+from tinker_arm_msgs.srv import ArmJointService
 from tinker_vision_msgs.msg import Object
 from sensor_msgs.msg import Image
 from std_msgs.msg import Header
@@ -21,6 +22,7 @@ class Services(Enum):
     OBJ_DETECTION = True
     REL_TO_ABS = True
     WAIT_FOR_START = True
+    MOVE_ARM_JOINT = True
 
 
 class MockServices(Node):
@@ -43,6 +45,8 @@ class MockServices(Node):
             self.rel_to_abs = self.create_service(RelToAbs, "rel_to_abs", self.rel_to_abs_callback)
         if Services.WAIT_FOR_START:
             self.drop = self.create_service(WaitForStart, "wait_for_start", self.wait_for_start_callback)
+        if Services.MOVE_ARM_JOINT:
+            self.drop = self.create_service(ArmJointService, "move_arm_joint", self.move_arm_joint_callback)
     
     def announce_callback(self, request, response):
         self.get_logger().info(f'Incoming announcement request for message: {request.announcement_msg}')
@@ -87,7 +91,11 @@ class MockServices(Node):
     def grasp_callback(self, request, response):
         self.get_logger().info(f'Incoming grasp request')
 
-        response.success = True
+        # response.success = True
+
+        response.success = False
+        response.stage = 0
+        # response.error_msg = "failed"
 
         return response
 
@@ -144,6 +152,11 @@ class MockServices(Node):
     def wait_for_start_callback(self, request, response):
         self.get_logger().info(f'Incoming wait for start request')
         response.status = 0
+        return response
+
+    def move_arm_joint_callback(self, request, response):
+        self.get_logger().info(f"Income move arm request")
+        response.success = True
         return response
 
 

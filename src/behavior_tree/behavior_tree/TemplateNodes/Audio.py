@@ -1,7 +1,8 @@
 import py_trees as pytree
 from py_trees.common import Status
 
-from tinker_decision_msgs.srv import Announce, WaitForStart
+# from tinker_decision_msgs.srv import Announce, WaitForStart
+from behavior_tree.messages import *
 
 from .BaseBehaviors import ServiceHandler
 

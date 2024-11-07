@@ -1,9 +1,12 @@
+from typing import Any
 import py_trees as pytree
 
 # from tinker_decision_msgs.srv import Grasp, Drop
 # from tinker_decision_msgs.srv import ObjectDetection
 # from geometry_msgs.msg import PointStamped
 from behavior_tree.messages import *
+from py_trees.common import Status
+from behavior_tree.Constants import SCAN_POSES
 
 from .BaseBehaviors import ServiceHandler
 
@@ -140,4 +143,63 @@ class BtNode_Drop(ServiceHandler):
                 return pytree.common.Status.FAILURE
         else:
             self.feedback_message = "Still dropping object..."
+            return pytree.common.Status.RUNNING
+
+
+class BtNode_MoveArm(ServiceHandler):
+    def __init__(self, name: str, 
+                 service_name: str, 
+                #  arm_joint_pose: list[float]
+                 arm_pose_bb_key
+                 ):
+        super().__init__(name, service_name, ArmJointService)
+        self.arm_pose_bb_key = arm_pose_bb_key
+        self.arm_joint_pose = None
+    
+    def setup(self, **kwargs):
+        ServiceHandler.setup(self, **kwargs)
+
+        self.bb_write_client = self.attach_blackboard_client(name="MoveArm Read")
+        self.bb_write_client.register_key(self.arm_pose_bb_key, access=pytree.common.Access.WRITE)
+
+        # debugger info (shown with DebugVisitor)
+        self.logger.debug(f"Setup MoveArm, reading from {self.arm_pose_bb_key}")
+
+    def initialise(self):
+        try:
+            self.arm_pose_idx = self.bb_write_client.get(self.arm_pose_bb_key)
+            assert isinstance(self.arm_pose_idx, int)
+            self.arm_joint_pose = SCAN_POSES[self.arm_pose_idx % len(SCAN_POSES)]
+
+        except Exception as e:
+            self.feedback_message = f"MoveArm reading object name failed"
+            raise e
+
+        request = ArmJointService.Request()
+        request.joint0 = self.arm_joint_pose[0]
+        request.joint1 = self.arm_joint_pose[1]
+        request.joint2 = self.arm_joint_pose[2]
+        request.joint3 = self.arm_joint_pose[3]
+        request.joint4 = self.arm_joint_pose[4]
+        request.joint5 = self.arm_joint_pose[5]
+        request.joint6 = self.arm_joint_pose[6]
+
+        self.response = self.client.call_async(request)
+
+        self.feedback_message = f"Initialized move arm joint for joints {self.arm_joint_pose}"
+    
+    def update(self) -> Status:
+        self.logger.debug(f"Update move arm joint")
+        if self.response.done():
+            # increase counter
+            self.bb_write_client.set(self.arm_pose_bb_key, self.arm_pose_idx + 1, overwrite=True)
+
+            if self.response.result().success:
+                self.feedback_message = f"Move arm Successful"
+                return pytree.common.Status.SUCCESS
+            else:
+                self.feedback_message = f"Move arm failed"
+                return pytree.common.Status.FAILURE
+        else:
+            self.feedback_message = "Still moving arm..."
             return pytree.common.Status.RUNNING
