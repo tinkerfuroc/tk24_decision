@@ -4,8 +4,9 @@ from time import sleep
 import rclpy
 from rclpy.node import Node
 
-from tinker_decision_msgs.srv import Announce, Drop, Goto, GotoGrasp, Grasp, ObjectDetection, RelToAbs, WaitForStart
+from tinker_decision_msgs.srv import Announce, Drop, Goto, GotoGrasp, Grasp, ObjectDetection, RelToAbs
 from tinker_vision_msgs.msg import Object
+from tinker_audio_msgs.srv import TextToSpeech, WaitForStart
 from sensor_msgs.msg import Image
 from std_msgs.msg import Header
 from geometry_msgs.msg import PointStamped, PoseStamped
@@ -13,40 +14,42 @@ from geometry_msgs.msg import PointStamped, PoseStamped
 
 # modify to decide which services to mock
 class Services(Enum):
-    ANNOUNCE = True
+    ANNOUNCE = False
     DROP = True
     GOTO = True
     GOTO_GRASP = True
     GRASP = True
     OBJ_DETECTION = True
     REL_TO_ABS = True
-    WAIT_FOR_START = True
+    WAIT_FOR_START = False
 
 
 class MockServices(Node):
     def __init__(self) -> None:
         super().__init__("mock_services")
 
-        if Services.ANNOUNCE:
-            self.announce = self.create_service(Announce, "announce", self.announce_callback)
-        if Services.DROP:
+        if Services.ANNOUNCE.value:
+            # self.announce = self.create_service(Announce, "announce", self.announce_callback)
+            print("mocking announce")
+            self.create_service(TextToSpeech, "announce", self.announce_callback)
+        if Services.DROP.value:
             self.drop = self.create_service(Drop, "drop", self.drop_callback)
-        if Services.GOTO:
+        if Services.GOTO.value:
             self.drop = self.create_service(Goto, "goto", self.goto_callback)
-        if Services.GOTO_GRASP:
+        if Services.GOTO_GRASP.value:
             self.drop = self.create_service(GotoGrasp, "goto_grasp", self.goto_grasp_callback)
-        if Services.GRASP:
+        if Services.GRASP.value:
             self.drop = self.create_service(Grasp, "grasp", self.grasp_callback)
-        if Services.OBJ_DETECTION:
+        if Services.OBJ_DETECTION.value:
             self.drop = self.create_service(ObjectDetection, "object_detection", self.obj_detection_callback)
-        if Services.REL_TO_ABS:
+        if Services.REL_TO_ABS.value:
             self.rel_to_abs = self.create_service(RelToAbs, "rel_to_abs", self.rel_to_abs_callback)
-        if Services.WAIT_FOR_START:
+        if Services.WAIT_FOR_START.value:
             self.drop = self.create_service(WaitForStart, "wait_for_start", self.wait_for_start_callback)
     
     def announce_callback(self, request, response):
-        self.get_logger().info(f'Incoming announcement request for message: {request.announcement_msg}')
-        if request.announcement_msg:
+        self.get_logger().info(f'Incoming announcement request for message: {request.text}')
+        if request.text:
             response.status = 0
         else:
             response.status = 1

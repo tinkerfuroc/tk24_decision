@@ -1,7 +1,8 @@
 import py_trees as pytree
 from py_trees.common import Status
 
-from tinker_decision_msgs.srv import Announce, WaitForStart
+# from tinker_decision_msgs.srv import Announce, WaitForStart
+from behavior_tree.messages import *
 
 from .BaseBehaviors import ServiceHandler
 
@@ -24,7 +25,7 @@ class BtNode_Announce(ServiceHandler):
         """
 
         # call parent initializer
-        super(BtNode_Announce, self).__init__(name, service_name, Announce)
+        super(BtNode_Announce, self).__init__(name, service_name, TextToSpeech)
         
         # store parameters
         self.bb_source = bb_source
@@ -55,8 +56,8 @@ class BtNode_Announce(ServiceHandler):
                 raise e
 
         # initialize a request and set the annnouncement message
-        request = Announce.Request()
-        request.announcement_msg = self.announce_msg
+        request = TextToSpeech.Request()
+        request.text = self.announce_msg
 
         # send request to service and store the returned Future object
         self.response = self.client.call_async(request)
@@ -74,7 +75,7 @@ class BtNode_Announce(ServiceHandler):
                 return pytree.common.Status.SUCCESS
             # else, update feedback message to reflect the error message and return failure
             else:
-                self.feedback_message = f"Announce for {self.announce_msg} failed with error code {self.response.result().status}: {self.response.result().error_msg}"
+                self.feedback_message = f"Announce for {self.announce_msg} failed with error code {self.response.result().status}"
                 return pytree.common.Status.FAILURE
         # if service is not done, simply return running
         else:
@@ -99,6 +100,7 @@ class BtNode_WaitForStart(ServiceHandler):
     
     def initialise(self):
         request = WaitForStart.Request()
+        request.timeout = 15.0
         self.response = self.client.call_async(request)
         self.feedback_message = f"Initialized wait for start"
 
@@ -109,7 +111,7 @@ class BtNode_WaitForStart(ServiceHandler):
                 self.feedback_message = "Started"
                 return pytree.common.Status.SUCCESS
             else:
-                self.feedback_message = f"Wait for start failed with error code {self.response.result().status}: {self.response.result().error_msg}"
+                self.feedback_message = f"Wait for start failed with error code {self.response.result().status}: {self.response.result().error_message}"
                 return pytree.common.Status.FAILURE
         else:
             self.feedback_message = "Still waiting for start..."

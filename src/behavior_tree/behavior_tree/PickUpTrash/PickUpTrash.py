@@ -18,8 +18,9 @@ pose_1m = PoseStamped()
 pose_turn90 = PoseStamped()
 
 # prompts (subject to change)
-PROMPT_ALL = "clear bottle . wrinkled paper . can"
-PROMPT_TRASH_BIN = "trash bin"
+PROMPT_ALL = "clear bottle . wrinkled paper . can . bottle"
+# PROMPT_TRASH_BIN = "trashcan"
+PROMPT_TRASH_BIN = "bowl"
 
 # blackboard key constants (do NOT change!)
 KEY_POINT_BIN_ABS = "point_bin_abs"
