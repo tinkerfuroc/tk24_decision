@@ -3,8 +3,9 @@ import py_trees as pytree
 # from geometry_msgs.msg import PointStamped, PoseStamped
 from behavior_tree.messages import *
 
+from behavior_tree.TemplateNodes.BaseBehaviors import BtNode_WriteToBlackboard
 from behavior_tree.TemplateNodes.Vision import BtNode_FindObj, BtNode_ScanFor
-from behavior_tree.TemplateNodes.Manipulation import BtNode_Grasp, BtNode_Drop
+from behavior_tree.TemplateNodes.Manipulation import BtNode_Grasp, BtNode_Drop, BtNode_MoveArm
 from behavior_tree.TemplateNodes.Audio import BtNode_Announce, BtNode_WaitForStart
 from behavior_tree.TemplateNodes.Navigation import BtNode_Goto, BtNode_GotoGrasp, BtNode_RelToAbs
 
@@ -27,6 +28,7 @@ KEY_POINT_BIN_ABS = "point_bin_abs"
 KEY_POINT_BIN_REL = "point_bin_relative"
 KEY_POINT_TRASH = "point_trash"
 KEY_TYPE_TRASH = "type_trash"
+KEY_MOVE_ARM = "move_arm"
 
 
 def createSearchForBin() -> pytree.composites.Sequence:
@@ -74,6 +76,7 @@ def create_drop_node():
     return root
 
 def pickAndDrop():
+    # deprecated
     root = pytree.composites.Sequence(name="pickup trash and drop", memory=True)
 
     goto_trash = BtNode_GotoGrasp("Got to trash point", KEY_POINT_TRASH, service_name=SRV_GOTO_GRASP)
@@ -88,28 +91,37 @@ def pickAndDrop():
 
     return root
 
-def searchAndPickupAtBin():
-    root = pytree.composites.Sequence(name="Scan at trash can and pickup", memory=True)
-    
-    # TODO: use absolute point of trash can
-    goto_bin = BtNode_GotoGrasp("Got to Trashcan", KEY_POINT_BIN_ABS, service_name=SRV_GOTO_GRASP)
+def createScanAndGoto():
+    root = pytree.composites.Sequence(name="Scan and Goto Trash", memory=True)
+    scan_and_turn = createScanAndTurn()
+    goto = BtNode_GotoGrasp("Got to trash point", KEY_POINT_TRASH, service_name=SRV_GOTO_GRASP)
+    root.add_children([scan_and_turn, goto])
+    return root
 
-    search = pytree.decorators.Retry(name="Keep Scanning and Turning", child=createScanAndTurn(), num_failures=4)
+def createGraspOnce():
+    root = pytree.composites.Sequence(name="Grasp Once", memory=True)
+    move_arm = BtNode_MoveArm("Move arm", service_name=SRV_MOVE_ARM, arm_pose_bb_key=KEY_MOVE_ARM)
+    find_trash = BtNode_FindObj("find trash", KEY_TYPE_TRASH, "/", "trash", SRV_OBJ_DETECTION)
+    grasp = BtNode_Grasp("Grasp trash", "/trash", service_name=SRV_GRASP)
+    root.add_children([move_arm, find_trash, grasp])
+    return root
 
-    # goto_trash = BtNode_GotoGrasp("Got to trash point", KEY_POINT_TRASH, service_name=SRV_GOTO_GRASP)
+def createGraspWithRetry():
+    root = pytree.composites.Sequence(name="Pickup Trash", memory=True)
+    # reset retry counter to 0
+    reset_idx = BtNode_WriteToBlackboard("Reset retry index", "/", KEY_MOVE_ARM, None, 0)
+    retry_grasp = pytree.decorators.Retry("Retry grasp", createGraspOnce(), len(SCAN_POSES))
+    root.add_children([reset_idx, retry_grasp])
+    return root
 
-    # grasp = BtNode_Grasp("Grasp trash", KEY_TYPE_TRASH, service_name=SRV_GRASP)
-
-    # drop = create_drop_node()
-
-    pick_and_drop = pickAndDrop()
-
-    # root.add_children([goto_bin, search, goto_trash, grasp, drop])
-    root.add_children([goto_bin, search, pick_and_drop])
-    
-
-    return pytree.decorators.Repeat(name="Seach and Pickup at Bin", child=root, num_success=9)
-
+def createScanAndGraspWithRetry():
+    root = pytree.composites.Sequence(name="Scan and Pickup", memory=True)
+    root.add_child(BtNode_GotoGrasp("Got to Trashcan", KEY_POINT_BIN_ABS, service_name=SRV_GOTO_GRASP))
+    root.add_child(createScanAndGoto())
+    root.add_child(createGraspWithRetry())
+    root.add_child(create_drop_node())
+    root = pytree.decorators.Retry("Retry until success", root, 3)
+    return root
 
 def searchAndPickupOutside():
     root = pytree.composites.Sequence(name="Scan at 1m and pickup", memory=True)
@@ -143,14 +155,38 @@ def createPickUpTrashTree() -> pytree.composites.Sequence:
 
     pickup_body = pytree.composites.Selector(name="Pickup until none left", memory=True)
 
-    search_at_bin = searchAndPickupAtBin()
+    # search_at_bin = searchAndPickupAtBin()
 
     search_outside = pytree.decorators.FailureIsSuccess(name="succcess wrapper", child=searchAndPickupOutside())
 
-    pickup_body.add_children([search_at_bin, search_outside])
+    pickup_body.add_children([createScanAndGraspWithRetry(), search_outside])
 
     end_node = pytree.behaviours.Running(name="The end...")
 
     root.add_children([announce_start, wait_for_start, search_for_bin, pickup_body, end_node])
 
     return root
+
+# deprecated functions
+# def searchAndPickupAtBin():
+#     # deprecated
+#     root = pytree.composites.Sequence(name="Scan at trash can and pickup", memory=True)
+    
+#     # TODO: use absolute point of trash can
+#     goto_bin = BtNode_GotoGrasp("Got to Trashcan", KEY_POINT_BIN_ABS, service_name=SRV_GOTO_GRASP)
+
+#     search = pytree.decorators.Retry(name="Keep Scanning and Turning", child=createScanAndTurn(), num_failures=4)
+
+#     # goto_trash = BtNode_GotoGrasp("Got to trash point", KEY_POINT_TRASH, service_name=SRV_GOTO_GRASP)
+
+#     # grasp = BtNode_Grasp("Grasp trash", KEY_TYPE_TRASH, service_name=SRV_GRASP)
+
+#     # drop = create_drop_node()
+
+#     pick_and_drop = pickAndDrop()
+
+#     # root.add_children([goto_bin, search, goto_trash, grasp, drop])
+#     root.add_children([goto_bin, search, pick_and_drop])
+    
+
+#     return pytree.decorators.Repeat(name="Seach and Pickup at Bin", child=root, num_success=9)
