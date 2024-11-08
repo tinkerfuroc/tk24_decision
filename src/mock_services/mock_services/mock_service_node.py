@@ -4,9 +4,9 @@ from time import sleep
 import rclpy
 from rclpy.node import Node
 
-from tinker_decision_msgs.srv import Announce, Drop, Goto, GotoGrasp, Grasp, ObjectDetection, RelToAbs
-from tinker_arm_msgs.srv import ArmJointService
-from tinker_vision_msgs.msg import Object
+from tinker_decision_msgs.srv import Announce, Drop, Goto, GotoGrasp, RelToAbs
+from tinker_arm_msgs.srv import ArmJointService, Grasp
+from tinker_vision_msgs.msg import Object, ObjectDetection
 from tinker_audio_msgs.srv import TextToSpeech, WaitForStart
 from sensor_msgs.msg import Image
 from std_msgs.msg import Header
