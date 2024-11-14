@@ -88,6 +88,7 @@ class BtNode_Drop(ServiceHandler):
                  name: str,
                  bb_source: str,
                  service_name : str = "drop",
+                 bin_point : PointStamped = None
                  ):
         """
         executed when creating tree diagram, therefor very minimal
@@ -99,6 +100,10 @@ class BtNode_Drop(ServiceHandler):
         super(BtNode_Drop, self).__init__(name, service_name, Drop)
         self.bb_source = bb_source
         self.bb_read_client = None
+        self.bin_point = bin_point
+
+        if self.bin_point is not None:
+            assert isinstance(self.bin_point, PointStamped)
 
 
     def setup(self, **kwargs):
@@ -107,27 +112,29 @@ class BtNode_Drop(ServiceHandler):
         """
         ServiceHandler.setup(self, **kwargs)
 
-        self.bb_read_client = self.attach_blackboard_client(name="Drop Read")
-        self.bb_read_client.register_key(self.bb_source, access=pytree.common.Access.READ)
+        if self.bin_point is None:
+            self.bb_read_client = self.attach_blackboard_client(name="Drop Read")
+            self.bb_read_client.register_key(self.bb_source, access=pytree.common.Access.READ)
 
-        # debugger info (shown with DebugVisitor)
-        self.logger.debug(f"Setup Drop, reading from {self.bb_source}")
+            # debugger info (shown with DebugVisitor)
+            self.logger.debug(f"Setup Drop, reading from {self.bb_source}")
 
     def initialise(self) -> None:
         """
         Called when the node is visited
         """
-        try:
-            bin_point = self.bb_read_client.get(self.bb_source)
-            assert isinstance(bin_point, PointStamped)
-        except Exception as e:
-            self.feedback_message = f"Drop reading object name failed"
-            raise e
+        if self.bin_point is None:
+            try:
+                self.bin_point = self.bb_read_client.get(self.bb_source)
+                assert isinstance(self.bin_point, PointStamped)
+            except Exception as e:
+                self.feedback_message = f"Drop reading object name failed"
+                raise e
 
-        self.logger.debug(f"Initialized Drop for bin point {bin_point}")
+        self.logger.debug(f"Initialized Drop for bin point {self.bin_point}")
 
         request = Drop.Request()
-        request.bin_point = bin_point
+        request.bin_point = self.bin_point
         # setup things that needs to be cleared
         self.response = self.client.call_async(request)
 

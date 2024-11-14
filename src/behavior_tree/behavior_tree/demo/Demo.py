@@ -17,9 +17,11 @@ POSE_SCAN_FOR_TRASH = PoseStamped()
 TRASH_POSES : list[PoseStamped]= []
 trash_idx = 0
 
+BIN_POINT = PointStamped()
+
 PROMPT_TRASH = "bottle"
 
-
+# blackboard constants
 KEY_MOVE_ARM = "move_arm"
 
 
@@ -57,6 +59,9 @@ def recursivePickUp():
 
     goto_bin = BtNode_Goto("go to trash can", None, SRV_GOTO, POSE_LOOK_AT_BIN)
     pickAndDrop.add_child(goto_bin)
+
+    drop = BtNode_Drop("drop trash", "", SRV_DROP, BIN_POINT)
+    pickAndDrop.add_child(drop)
 
     return root
 
