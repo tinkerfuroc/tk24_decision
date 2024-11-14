@@ -147,7 +147,7 @@ class BtNode_FindObj(ServiceHandler):
                 self.feedback_message = f"Found object, stored to blackboard {self.bb_namespace} / {self.bb_key}"
                 return pytree.common.Status.SUCCESS
             else:
-                self.feedback_message = f"Find Obj for {self.object} failed with error code {self.response.result().status}: {self.response.result().error_msg}"
+                self.feedback_message = f"Find Obj for {self.object} failed with error code {self.response.result().status}"
                 return pytree.common.Status.FAILURE
         else:
             self.feedback_message = "Still finding obj..."

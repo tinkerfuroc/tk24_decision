@@ -9,6 +9,7 @@ from py_trees.common import Status
 from behavior_tree.Constants import SCAN_POSES
 
 from .BaseBehaviors import ServiceHandler
+import math
 
 
 class BtNode_Grasp(ServiceHandler):
@@ -169,6 +170,11 @@ class BtNode_MoveArm(ServiceHandler):
         try:
             self.arm_pose_idx = self.bb_write_client.get(self.arm_pose_bb_key)
             assert isinstance(self.arm_pose_idx, int)
+            # if SCAN_POSES is None:
+            #     arm_joint_pose_d = SCAN_POSES_D[self.arm_pose_idx % len(SCAN_POSES)]
+            #     self.arm_joint_pose = [x / 180 * math.pi for x in arm_joint_pose_d]
+            # else:
+            #     self.arm_joint_pose_d = None
             self.arm_joint_pose = SCAN_POSES[self.arm_pose_idx % len(SCAN_POSES)]
 
         except Exception as e:
@@ -176,6 +182,7 @@ class BtNode_MoveArm(ServiceHandler):
             raise e
 
         request = ArmJointService.Request()
+        
         request.joint0 = self.arm_joint_pose[0]
         request.joint1 = self.arm_joint_pose[1]
         request.joint2 = self.arm_joint_pose[2]
@@ -201,5 +208,5 @@ class BtNode_MoveArm(ServiceHandler):
                 self.feedback_message = f"Move arm failed"
                 return pytree.common.Status.FAILURE
         else:
-            self.feedback_message = "Still moving arm..."
+            self.feedback_message = f"Still moving arm to {self.arm_joint_pose}..."
             return pytree.common.Status.RUNNING
