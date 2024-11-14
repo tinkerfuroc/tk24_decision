@@ -58,7 +58,7 @@ def recursivePickUp():
     goto_bin = BtNode_Goto("go to trash can", None, SRV_GOTO, POSE_LOOK_AT_BIN)
     pickAndDrop.add_child(goto_bin)
 
-    
+    return root
 
     
 
