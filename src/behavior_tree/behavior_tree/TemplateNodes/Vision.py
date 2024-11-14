@@ -90,7 +90,8 @@ class BtNode_FindObj(ServiceHandler):
                  bb_source,
                  bb_namespace: str,
                  bb_key:str,
-                 service_name:str = "object_detection"
+                 service_name:str = "object_detection",
+                 object:str = None
                  ):
         """
         executed when creating tree diagram, therefor very minimal
@@ -99,7 +100,7 @@ class BtNode_FindObj(ServiceHandler):
         self.bb_namespace = bb_namespace
         self.bb_key = bb_key
         self.bb_source = bb_source
-        self.object = None
+        self.object = object
 
 
     def setup(self, **kwargs):
@@ -108,8 +109,9 @@ class BtNode_FindObj(ServiceHandler):
         """
         ServiceHandler.setup(self, **kwargs)
 
-        self.bb_read_client = self.attach_blackboard_client(name="FindObj Read")
-        self.bb_read_client.register_key(self.bb_source, access=pytree.common.Access.READ)
+        if self.object is None:
+            self.bb_read_client = self.attach_blackboard_client(name="FindObj Read")
+            self.bb_read_client.register_key(self.bb_source, access=pytree.common.Access.READ)
 
         # attaches a blackboard (more like a shared memory section with key-value pair references) under the namespace Locations
         self.bb_write_client = self.attach_blackboard_client(name=f"FindObj", namespace=self.bb_namespace)
@@ -123,12 +125,13 @@ class BtNode_FindObj(ServiceHandler):
         """
         Called when the node is visited
         """
-        try:
-            self.object = self.bb_read_client.get(self.bb_source)
-            assert isinstance(self.object, str)
-        except Exception as e:
-            self.feedback_message = f"FindObj reading object name failed"
-            raise e
+        if self.object is None:
+            try:
+                self.object = self.bb_read_client.get(self.bb_source)
+                assert isinstance(self.object, str)
+            except Exception as e:
+                self.feedback_message = f"FindObj reading object name failed"
+                raise e
 
         request = ObjectDetection.Request()
         request.prompt = self.object

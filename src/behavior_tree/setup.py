@@ -21,7 +21,9 @@ setup(
     entry_points={
         'console_scripts': [
             'ptrash = behavior_tree.main:pick_up_trash',
-            'draw_ptrash = behavior_tree.main:draw_pick_up_trash'
+            'draw_ptrash = behavior_tree.main:draw_pick_up_trash',
+            'demo = behavior_tree.main:demo',
+            'draw_demo = behavior_tree.main:draw_demo'
         ],
     },
 )

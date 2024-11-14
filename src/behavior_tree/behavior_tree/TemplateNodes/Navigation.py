@@ -4,6 +4,7 @@ from .BaseBehaviors import ServiceHandler
 # from geometry_msgs.msg import PointStamped, PoseStamped
 
 from behavior_tree.messages import *
+from nav_msgs.msg import Odometry
 
 class BtNode_Goto(ServiceHandler):
     def __init__(self, 
@@ -234,3 +235,14 @@ class BtNode_RelToAbs(ServiceHandler):
         else:
             self.feedback_message = "Still converting pose/point"
             return py_trees.common.Status.RUNNING
+
+
+class BtNode_Turn(ServiceHandler):
+    def __init__(self, name: str, service_name: str):
+        super().__init__(name, service_name, Goto)
+        self.current_pos = None
+    
+    def setup(self, **kwargs):
+        super().setup(**kwargs)
+        self.odom_sub = self.create_subscription(Odometry, '/rtabmap/odom', self.odomCallback, 1)
+        
