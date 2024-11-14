@@ -1,4 +1,4 @@
-from behavior_tree.behavior_tree.messages import PoseStamped
+from behavior_tree.messages import PoseStamped
 import py_trees
 from behavior_tree.TemplateNodes.Navigation import BtNode_Goto
 # from tinker_decision_msgs.srv import Goto, GotoGrasp, RelToAbs
