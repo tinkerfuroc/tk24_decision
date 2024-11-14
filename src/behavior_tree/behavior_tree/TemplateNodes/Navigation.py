@@ -140,14 +140,16 @@ class BtNode_GotoGrasp(ServiceHandler):
     def update(self):
         self.logger.debug(f"Update GotoGrasp")
         if self.response.done():
-            if self.response.result().status == 0:
-                self.feedback_message = f"GotoGrasp Successful"
-                return py_trees.common.Status.SUCCESS
-            else:
-                self.feedback_message = f"GotoGrasp failed with status {self.response.result().status}: {self.response.result().error_msg}"
-                return py_trees.common.Status.FAILURE
+            self.feedback_message = f"GotoGrasp returned with status {self.response.result().status}"
+            return py_trees.common.Status.SUCCESS
+            # if self.response.result().status == 0:
+            #     self.feedback_message = f"GotoGrasp Successful"
+            #     return py_trees.common.Status.SUCCESS
+            # else:
+            #     self.feedback_message = f"GotoGrasp failed with status {self.response.result().status}: {self.response.result().error_msg}"
+            #     return py_trees.common.Status.FAILURE
         else:
-            self.feedback_message = "Still navigating to grasping pose..."
+            self.feedback_message = f"Still navigating to grasping pose {self.target}"
             return py_trees.common.Status.RUNNING
 
 

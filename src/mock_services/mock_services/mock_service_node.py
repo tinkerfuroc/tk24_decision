@@ -4,9 +4,9 @@ from time import sleep
 import rclpy
 from rclpy.node import Node
 
-from tinker_decision_msgs.srv import Announce, Drop, Goto, GotoGrasp, RelToAbs
+from tinker_decision_msgs.srv import Announce, Drop, Goto, GotoGrasp, RelToAbs, ObjectDetection
 from tinker_arm_msgs.srv import ArmJointService, Grasp
-from tinker_vision_msgs.msg import Object, ObjectDetection
+from tinker_vision_msgs.msg import Object
 from tinker_audio_msgs.srv import TextToSpeech, WaitForStart
 from sensor_msgs.msg import Image
 from std_msgs.msg import Header
@@ -16,14 +16,14 @@ from geometry_msgs.msg import PointStamped, PoseStamped
 # modify to decide which services to mock
 class Services(Enum):
     ANNOUNCE = False
-    DROP = True
+    DROP = False
     GOTO = True
     GOTO_GRASP = True
-    GRASP = True
-    OBJ_DETECTION = True
+    GRASP = False
+    OBJ_DETECTION = False
     REL_TO_ABS = True
-    WAIT_FOR_START = True
-    MOVE_ARM_JOINT = True
+    WAIT_FOR_START = False
+    MOVE_ARM_JOINT = False
 
 
 class MockServices(Node):
@@ -37,9 +37,9 @@ class MockServices(Node):
         if Services.DROP.value:
             self.drop = self.create_service(Drop, "drop", self.drop_callback)
         if Services.GOTO.value:
-            self.drop = self.create_service(Goto, "goto", self.goto_callback)
+            self.drop = self.create_service(Goto, "go_to", self.goto_callback)
         if Services.GOTO_GRASP.value:
-            self.drop = self.create_service(GotoGrasp, "goto_grasp", self.goto_grasp_callback)
+            self.drop = self.create_service(GotoGrasp, "go_to_grasp", self.goto_grasp_callback)
         if Services.GRASP.value:
             self.drop = self.create_service(Grasp, "grasp", self.grasp_callback)
         if Services.OBJ_DETECTION.value:
