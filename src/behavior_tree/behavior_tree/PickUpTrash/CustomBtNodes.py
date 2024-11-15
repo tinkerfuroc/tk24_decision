@@ -1,6 +1,6 @@
 # from geometry_msgs.msg import PointStamped, PoseStamped
-from behavior_tree.messages import *
 import py_trees
+from behavior_tree.messages import *
 
 from behavior_tree.TemplateNodes.Vision import BtNode_ScanFor
 from behavior_tree.messages import ArmJointService
