@@ -9,7 +9,7 @@ from behavior_tree.TemplateNodes.Manipulation import BtNode_Grasp, BtNode_Drop, 
 from behavior_tree.TemplateNodes.Audio import BtNode_Announce, BtNode_WaitForStart
 from behavior_tree.TemplateNodes.Navigation import BtNode_Goto, BtNode_GotoGrasp, BtNode_RelToAbs
 
-from .CustomBtNodes import BtNode_ScanAndSave, BtNode_MoveArmInitial
+from .CustomBtNodes import BtNode_ScanAndSave, BtNode_MoveArmSet
 from behavior_tree.Constants import *
 
 # TODO: replace with actual pose of the 1m place
@@ -22,7 +22,7 @@ pose_turn90 = PoseStamped()
 PROMPT_ALL = "bottle . can"
 # PROMPT_ALL = "giraffe"
 # PROMPT_TRASH_BIN = "trashcan"
-PROMPT_TRASH_BIN = "bowl"
+PROMPT_TRASH_BIN = "trashcan"
 
 # blackboard key constants (do NOT change!)
 # KEY_POINT_BIN_ABS = "point_bin_abs"
@@ -32,6 +32,20 @@ KEY_POINT_TRASH = "point_trash"
 KEY_TYPE_TRASH = "type_trash"
 KEY_MOVE_ARM = "move_arm"
 
+
+def scanWithArm() -> pytree.composites.Sequence:
+    root = pytree.composites.Sequence(name="Scan with arm", memory=True)
+
+    move_arm_up = BtNode_MoveArmSet("Move arm up", service_name=SRV_MOVE_ARM, LOOK_POSE)
+    root.add_child(move_arm_up)
+
+    scan = BtNode_ScanAndSave("Scan with arm", None, KEY_POINT_TRASH, KEY_TYPE_TRASH, service_name=SRV_OBJ_DETECTION, object=PROMPT_ALL, use_orbbec=False)
+    root.add_child(scan)
+
+    move_arm_back = BtNode_MoveArmSet("Move arm back", service_name=SRV_MOVE_ARM)
+    root.add_child(move_arm_back)
+
+    return root
 
 def createSearchForBin() -> pytree.composites.Sequence:
     root = pytree.composites.Sequence(name="Search for trash bin", memory=True)
@@ -53,6 +67,9 @@ def createScanAndTurn():
 
     scan = BtNode_ScanAndSave("Scan & check if found", None, KEY_POINT_TRASH, KEY_TYPE_TRASH, service_name=SRV_OBJ_DETECTION, object=PROMPT_ALL)
     root.add_child(scan)
+
+    scan_with_arm = scanWithArm()
+    root.add_child(scan_with_arm)
 
     if not WITHOUT_NAV_CONSTANTS:
         turn = BtNode_Goto("turn 90 degrees", None, service_name=SRV_GOTO, target=pose_turn90)
@@ -84,13 +101,9 @@ def create_drop_node():
 def pickAndDrop():
     # deprecated
     root = pytree.composites.Sequence(name="pickup trash and drop", memory=True)
-
     goto_trash = BtNode_GotoGrasp("Got to trash point", KEY_POINT_TRASH, service_name=SRV_GOTO_GRASP)
-
     find_trash = BtNode_FindObj("find trash", KEY_TYPE_TRASH, "/", "trash", SRV_OBJ_DETECTION)
-
     grasp = BtNode_Grasp("Grasp trash", "/trash", service_name=SRV_GRASP)
-
     drop = create_drop_node()
 
     root.add_children([goto_trash, find_trash, grasp, drop])
@@ -135,16 +148,8 @@ def searchAndPickupOutside():
     goto_1m_pos = BtNode_Goto("Goto 1m pos", None, service_name=SRV_GOTO, target=pose_1m)
 
     scan = BtNode_ScanAndSave("Scan for trash", None, KEY_POINT_TRASH, KEY_TYPE_TRASH, service_name=SRV_OBJ_DETECTION, object=PROMPT_ALL)
-    
-    # goto_trash = BtNode_GotoGrasp("Got to trash point", KEY_POINT_TRASH, service_name=SRV_GOTO_GRASP)
-
-    # grasp = BtNode_Grasp("Grasp trash", KEY_TYPE_TRASH, service_name=SRV_GRASP)
-
-    # drop = create_drop_node()
 
     pick_and_drop = pickAndDrop()
-
-    # root.add_children([goto_1m_pos, scan, goto_trash, grasp, drop])
 
     root.add_children([goto_1m_pos, scan, pick_and_drop])
     
@@ -154,8 +159,8 @@ def searchAndPickupOutside():
 def createPickUpTrashTree() -> pytree.composites.Sequence:
     root = pytree.composites.Sequence(name="Pick Up Trash Root", memory=True)
 
-    # reset_arm = BtNode_MoveArmInitial("Reset Arm", service_name=SRV_MOVE_ARM)
-    # root.add_child(reset_arm)
+    reset_arm = BtNode_MoveArmSet("Reset Arm", service_name=SRV_MOVE_ARM)
+    root.add_child(reset_arm)
 
     announce_start = BtNode_Announce("Announce Ready", None, service_name=SRV_ANNOUNCE, message="Ready")
     wait_for_start = BtNode_WaitForStart("Wait for Start", service_name=SRV_WAIT_FOR_START)

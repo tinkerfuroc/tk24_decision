@@ -13,9 +13,10 @@ class BtNode_ScanAndSave(BtNode_ScanFor):
                  bb_key_type : str,
                  service_name: str = "object_detection", 
                  object: str = None,
-                 filter_far = False
+                 filter_far = False,
+                 use_orbbec = False,
                  ):
-        super().__init__(name, bb_source, "ScanFor", "Response", service_name, object)
+        super().__init__(name, bb_source, "ScanFor", "Response", service_name, object, use_orbbec)
 
         self.bb_key_point = bb_key_point
         self.bb_key_type = bb_key_type
@@ -67,12 +68,15 @@ class BtNode_ScanAndSave(BtNode_ScanFor):
             return py_trees.common.Status.RUNNING
 
 
-class BtNode_MoveArmInitial(ServiceHandler):
+class BtNode_MoveArmSet(ServiceHandler):
     def __init__(self, name: str, 
                  service_name: str, 
+                 arm_joint_pose: list[float] = [0., 0.6, 0., -0.3, 0., -44.4, 0.]
                  ):
         super().__init__(name, service_name, ArmJointService)
-        self.arm_joint_pose = [0., 0.6, 0., -0.3, 0., -44.4, 0.]
+        self.arm_joint_pose = arm_joint_pose
+
+        assert isinstance(self.arm_joint_pose, list) and len(self.arm_joint_pose) == 7
     
     def setup(self, **kwargs):
         ServiceHandler.setup(self, **kwargs)

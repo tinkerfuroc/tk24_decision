@@ -17,6 +17,7 @@ class BtNode_ScanFor(ServiceHandler):
                  bb_key:str,
                  service_name : str = "object_detection",
                  object: str = None,
+                 use_orbbec = True
                  ):
         """
         executed when creating tree diagram, therefor very minimal
@@ -26,6 +27,7 @@ class BtNode_ScanFor(ServiceHandler):
         self.bb_key = bb_key
         self.bb_source = bb_source
         self.object = object
+        self.use_orbbec = use_orbbec
 
 
     def setup(self, **kwargs):
@@ -62,7 +64,10 @@ class BtNode_ScanFor(ServiceHandler):
         request = ObjectDetection.Request()
         request.prompt = self.object
         request.flags = "scan"
-        request.camera = "orbbec"
+        if self.use_orbbec:
+            request.camera = "orbbec"
+        else:
+            request.camera = "realsense"
         # setup things that needs to be cleared
         self.response = self.client.call_async(request)
 

@@ -33,3 +33,7 @@ SCAN_POSES = [
     [x / 180 * math.pi for x in p] for p in SCAN_POSES_D
 ]
 
+# TODO: change this to the actual pose
+LOOK_POSE_D = [0.0, 0.0, 0.0, 0.0, 0.0, -45.0, 0.0]
+LOOK_POSE = [x / 180 * math.pi for x in LOOK_POSE_D]
+
