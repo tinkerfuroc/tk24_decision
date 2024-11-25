@@ -17,7 +17,8 @@ class BtNode_ScanFor(ServiceHandler):
                  bb_key:str,
                  service_name : str = "object_detection",
                  object: str = None,
-                 use_orbbec = True
+                 use_orbbec = True,
+                 transform_to_map = False
                  ):
         """
         executed when creating tree diagram, therefor very minimal
@@ -28,6 +29,10 @@ class BtNode_ScanFor(ServiceHandler):
         self.bb_source = bb_source
         self.object = object
         self.use_orbbec = use_orbbec
+        self.transform_to_map = transform_to_map
+        self.read = True
+        if self.object is not None:
+            self.read = False
 
 
     def setup(self, **kwargs):
@@ -40,7 +45,7 @@ class BtNode_ScanFor(ServiceHandler):
          # register a key with the name of the object, with this client having write access
         self.bb_write_client.register_key(self.bb_key, access=pytree.common.Access.WRITE)
 
-        if not self.object:
+        if self.read:
             self.bb_read_client = self.attach_blackboard_client(name="ScanFor Read")
             self.bb_read_client.register_key(self.bb_source, access=pytree.common.Access.READ)
 
@@ -53,7 +58,7 @@ class BtNode_ScanFor(ServiceHandler):
         """
         Called when the node is visited
         """
-        if not self.object:
+        if self.read:
             try:
                 self.object = self.bb_read_client.get(self.bb_source)
                 assert isinstance(self.object, str)
@@ -68,13 +73,15 @@ class BtNode_ScanFor(ServiceHandler):
             request.camera = "orbbec"
         else:
             request.camera = "realsense"
+        if self.transform_to_map:
+            request.target_frame = "map"
         # setup things that needs to be cleared
         self.response = self.client.call_async(request)
 
         self.feedback_message = f"Initialized ScanFor for {self.object}"
 
     def update(self):
-        self.logger.debug(f"Update ScanFor {self.object}")
+        self.logger.debug(f"Update ScanFor {self.object} with self.orbbec = {self.use_orbbec}")
         if self.response.done():
             if self.response.result().status == 0:
                 self.bb_write_client.set(self.bb_key, self.response.result(), overwrite=True)
@@ -106,7 +113,9 @@ class BtNode_FindObj(ServiceHandler):
         self.bb_key = bb_key
         self.bb_source = bb_source
         self.object = object
-
+        self.read = True
+        if self.object is not None:
+            self.read = False
 
     def setup(self, **kwargs):
         """
@@ -114,7 +123,7 @@ class BtNode_FindObj(ServiceHandler):
         """
         ServiceHandler.setup(self, **kwargs)
 
-        if self.object is None:
+        if self.read:
             self.bb_read_client = self.attach_blackboard_client(name="FindObj Read")
             self.bb_read_client.register_key(self.bb_source, access=pytree.common.Access.READ)
 
@@ -130,7 +139,7 @@ class BtNode_FindObj(ServiceHandler):
         """
         Called when the node is visited
         """
-        if self.object is None:
+        if self.read:
             try:
                 self.object = self.bb_read_client.get(self.bb_source)
                 assert isinstance(self.object, str)
@@ -151,8 +160,16 @@ class BtNode_FindObj(ServiceHandler):
         self.logger.debug(f"Update FindObj {self.object}")
         if self.response.done():
             if self.response.result().status == 0:
+                # removing objetcs too far away for arm to reach
+                point_stamped = PointStamped()
+                point_stamped.point = self.response.result().objects[0].centroid
+                point_stamped.header = self.response.result().header
+                if point_stamped.point.z > 0.375: # realsense depth is further away than returned, 0.375 ~= 0.6m
+                    self.feedback_message = f"Detected Object is too far away"
+                    return pytree.common.Status.FAILURE
+
                 self.bb_write_client.set(self.bb_key, self.response.result(), overwrite=True)
-                self.feedback_message = f"Found object, stored to blackboard {self.bb_namespace} / {self.bb_key}"
+                self.feedback_message = f"Found object, stored to blackboard {self.bb_namespace} / {self.bb_key} with distance {point_stamped.point.z}"
                 return pytree.common.Status.SUCCESS
             else:
                 self.feedback_message = f"Find Obj for {self.object} failed with error code {self.response.result().status}"

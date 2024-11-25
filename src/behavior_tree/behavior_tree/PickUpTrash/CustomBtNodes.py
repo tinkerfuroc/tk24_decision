@@ -1,5 +1,6 @@
 # from geometry_msgs.msg import PointStamped, PoseStamped
 import py_trees
+import math
 from behavior_tree.messages import *
 
 from behavior_tree.TemplateNodes.Vision import BtNode_ScanFor
@@ -14,9 +15,10 @@ class BtNode_ScanAndSave(BtNode_ScanFor):
                  service_name: str = "object_detection", 
                  object: str = None,
                  filter_far = False,
-                 use_orbbec = False,
+                 use_orbbec = True,
+                 transform_to_map = False
                  ):
-        super().__init__(name, bb_source, "ScanFor", "Response", service_name, object, use_orbbec)
+        super().__init__(name, bb_source, "ScanFor", "Response", service_name, object, use_orbbec, transform_to_map)
 
         self.bb_key_point = bb_key_point
         self.bb_key_type = bb_key_type
@@ -29,6 +31,15 @@ class BtNode_ScanAndSave(BtNode_ScanFor):
         self.bb_point_client = self.attach_blackboard_client(name=f"ScanForPoint Write")
         self.bb_point_client.register_key(self.bb_key_point, access=py_trees.common.Access.WRITE)
         self.bb_point_client.register_key(self.bb_key_type, access=py_trees.common.Access.WRITE)
+
+        self.bb_read_client = self.attach_blackboard_client(name=f"ScanForPoint Read")
+        self.bb_read_client.register_key(self.bb_key_point, access=py_trees.common.Access.READ)
+        self.bb_read_client.register_key(self.bb_key_type, access=py_trees.common.Access.READ)
+    
+    def initialize(self):
+        super().initialize()
+        self.bb_point_client.set(self.bb_key_point, PointStamped(), overwrite=True)
+        self.bb_point_client.set(self.bb_key_type, "", overwrite=True)
     
     def update(self):
         self.logger.debug(f"Update ScanFor {self.object}")
@@ -42,7 +53,6 @@ class BtNode_ScanAndSave(BtNode_ScanFor):
                     point_stamped.point = self.response.result().objects[0].centroid
                     point_stamped.header = self.response.result().header
 
-
                     classfication = self.response.result().objects[0].cls
 
                     if self.filter_far:
@@ -51,11 +61,15 @@ class BtNode_ScanAndSave(BtNode_ScanFor):
                             return py_trees.common.Status.FAILURE
 
                     # store the PointStamped and the type to the given blackboard keys
-                    self.bb_point_client.set(self.bb_key_point, point_stamped, overwrite=True)
+                    set_result = self.bb_point_client.set(self.bb_key_point, point_stamped, overwrite=True)
                     self.bb_point_client.set(self.bb_key_type, classfication, overwrite=True)
+
+                    verify_point = self.bb_point_client.get(self.bb_key_point)
+                    verify_type = self.bb_point_client.get(self.bb_key_type)
                     
                     # update feedback message
-                    self.feedback_message = f"Found objects, first object's centroid ({point_stamped}) stored to {self.bb_key_point}, type {classfication} stored to {self.bb_key_type}"
+                    # self.feedback_message = f"Found objects, first object's centroid ({point_stamped}) stored to {self.bb_key_point}, type {classfication} stored to {self.bb_key_type} with {set_result}"
+                    self.feedback_message = f"Found objects, first object's centroid ({verify_point}) stored to {self.bb_key_point}, type {verify_type} stored to {self.bb_key_type} with {set_result}"
                     return py_trees.common.Status.SUCCESS
                 else:
                     self.feedback_message = f"Response does not contain an object"
@@ -71,7 +85,8 @@ class BtNode_ScanAndSave(BtNode_ScanFor):
 class BtNode_MoveArmSet(ServiceHandler):
     def __init__(self, name: str, 
                  service_name: str, 
-                 arm_joint_pose: list[float] = [0., 0.6, 0., -0.3, 0., -44.4, 0.]
+                #  arm_joint_pose: list[float] = [0.0, 0.010472, 0.0, -0.005236, 0.0, -0.77493, 0.0]
+                 arm_joint_pose: list[float] = [x/180.0 * math.pi for x in [-89.4, -51.6, 0.0, 10.1, 0.1, -82.4, 0.0]]
                  ):
         super().__init__(name, service_name, ArmJointService)
         self.arm_joint_pose = arm_joint_pose

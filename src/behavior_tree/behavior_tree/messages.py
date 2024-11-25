@@ -8,5 +8,7 @@ from tinker_arm_msgs.srv import Grasp, Drop
 # from tinker_decision_msgs.srv import Announce, WaitForStart
 from tinker_audio_msgs.srv import TextToSpeech, WaitForStart
 
+import rclpy
 from geometry_msgs.msg import Point, PointStamped, Pose, PoseStamped, Quaternion
 from tinker_arm_msgs.srv import ArmJointService
+from std_msgs.msg import Header

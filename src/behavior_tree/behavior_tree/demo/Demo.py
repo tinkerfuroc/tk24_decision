@@ -9,6 +9,7 @@ from behavior_tree.TemplateNodes.Manipulation import BtNode_Grasp, BtNode_Drop, 
 from behavior_tree.TemplateNodes.Audio import BtNode_Announce, BtNode_WaitForStart
 from behavior_tree.TemplateNodes.Navigation import BtNode_Goto, BtNode_GotoGrasp, BtNode_RelToAbs
 from behavior_tree.PickUpTrash.CustomBtNodes import BtNode_ScanAndSave
+from behavior_tree.demo.CustomBtNodes import BtNode_TestBB
 
 from std_msgs.msg import Header
 
@@ -60,8 +61,9 @@ def createGraspOnce():
     root = py_trees.composites.Sequence(name="Grasp Once", memory=True)
     move_arm = BtNode_MoveArm("Move arm", service_name=SRV_MOVE_ARM, arm_pose_bb_key=KEY_MOVE_ARM)
     find_trash = BtNode_FindObj("find trash", "", "", "trash", SRV_OBJ_DETECTION, PROMPT_TRASH)
-    grasp = BtNode_Grasp("Grasp trash", "/trash", service_name=SRV_GRASP)
-    root.add_children([move_arm, find_trash, grasp])
+    # grasp = BtNode_Grasp("Grasp trash", "/trash", service_name=SRV_GRASP)
+    root.add_children([move_arm, find_trash])
+    # root.add_children([move_arm, find_trash, grasp])
     return root
 
 def createGraspWithRetry():
@@ -122,9 +124,9 @@ def createDemoGrasp() -> py_trees.composites.Sequence:
     reset_arm = BtNode_MoveArmInitial("Reset Arm", service_name=SRV_MOVE_ARM)
     root.add_child(reset_arm)
 
-    announce_start = BtNode_Announce("Announce Ready", None, service_name=SRV_ANNOUNCE, message="Ready")
-    wait_for_start = BtNode_WaitForStart("Wait for Start", service_name=SRV_WAIT_FOR_START)
-    root.add_children([announce_start, wait_for_start])
+    # announce_start = BtNode_Announce("Announce Ready", None, service_name=SRV_ANNOUNCE, message="Ready")
+    # wait_for_start = BtNode_WaitForStart("Wait for Start", service_name=SRV_WAIT_FOR_START)
+    # root.add_children([announce_start, wait_for_start])
 
     graspAndDrop = py_trees.composites.Sequence("grasp and drop", True)
 
@@ -136,11 +138,16 @@ def createDemoGrasp() -> py_trees.composites.Sequence:
     # graspAndDrop.add_child(find_bin)
 
     # drop = BtNode_Drop("Drop in bin", KEY_POINT_BIN_REL, SRV_DROP)
+
     drop = BtNode_Drop("drop trash", "", SRV_DROP, DROP_POINT)
-    graspAndDrop.add_child(drop)
+    # graspAndDrop.add_child(drop)
 
     root.add_child(py_trees.decorators.FailureIsSuccess("success wrapper", py_trees.decorators.Repeat("repeat until fail", graspAndDrop, -1)))
 
     root.add_child(py_trees.behaviours.Running("the end"))
 
     return root
+
+def createTestBB():
+    root = BtNode_TestBB("Test BB", "test")
+    return py_trees.decorators.Repeat("repeat wrapper", root, num_success=20)

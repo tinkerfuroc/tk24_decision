@@ -97,8 +97,10 @@ class BtNode_GotoGrasp(ServiceHandler):
         self.bb_source = bb_source
         self.bb_read_client = None
         self.target = target
+        self.read = True
         if target is not None:
             assert isinstance(self.target, PointStamped)
+            self.read = False
 
 
     def setup(self, **kwargs):
@@ -107,7 +109,7 @@ class BtNode_GotoGrasp(ServiceHandler):
         """
         ServiceHandler.setup(self, **kwargs)
 
-        if self.target is None:
+        if self.read:
             self.bb_read_client = self.attach_blackboard_client(name="GotoGrasp Read")
             self.bb_read_client.register_key(self.bb_source, access=py_trees.common.Access.READ)
 
@@ -120,10 +122,11 @@ class BtNode_GotoGrasp(ServiceHandler):
         """
         Called when the node is visited
         """
-        if self.target is None:
+        if self.read:
             try:
                 self.target = self.bb_read_client.get(self.bb_source)
                 assert isinstance(self.target, PointStamped)
+                self.read = True
             except Exception as e:
                 self.feedback_message = f"GotoGrasp reading target point failed"
                 raise e
@@ -135,7 +138,7 @@ class BtNode_GotoGrasp(ServiceHandler):
         # setup things that needs to be cleared
         self.response = self.client.call_async(request)
 
-        self.feedback_message = f"Initialized GotoGrasp"
+        self.feedback_message = f"Initialized GotoGrasp, read set to {self.read}"
 
     def update(self):
         self.logger.debug(f"Update GotoGrasp")
@@ -149,7 +152,7 @@ class BtNode_GotoGrasp(ServiceHandler):
             #     self.feedback_message = f"GotoGrasp failed with status {self.response.result().status}: {self.response.result().error_msg}"
             #     return py_trees.common.Status.FAILURE
         else:
-            self.feedback_message = f"Still navigating to grasping pose {self.target}"
+            self.feedback_message = f"Still navigating to grasping pose {self.target} from {self.bb_source} (read set to {self.read})"
             return py_trees.common.Status.RUNNING
 
 
@@ -172,8 +175,10 @@ class BtNode_RelToAbs(ServiceHandler):
         self.bb_read_client = None
         self.bb_write_client = None
         self.target = target
+        self.read = True
         if target is not None:
             assert (isinstance(target, PointStamped) or isinstance(target, PoseStamped))
+            self.read = False
 
 
     def setup(self, **kwargs):
@@ -186,7 +191,7 @@ class BtNode_RelToAbs(ServiceHandler):
         self.bb_write_client.register_key(self.bb_key_result, access = py_trees.common.Access.WRITE)
 
 
-        if self.target is None:
+        if self.read:
             self.bb_read_client = self.attach_blackboard_client(name="RelToAbs Read")
             self.bb_read_client.register_key(self.bb_key_source, access=py_trees.common.Access.READ)
 
@@ -199,7 +204,7 @@ class BtNode_RelToAbs(ServiceHandler):
         """
         Called when the node is visited
         """
-        if self.target is None:
+        if self.read:
             try:
                 self.target = self.bb_read_client.get(self.bb_key_source)
                 assert (isinstance(self.target, PointStamped) or isinstance(self.target, PoseStamped))

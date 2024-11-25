@@ -79,7 +79,7 @@ class GotoObject(pytree.behaviour.Behaviour):
         self.logger.debug(f"Update GotoObject {self.object}")
 
         if self.location is None:
-            if not self.client.exists(self.object):
+            if not self.client.c(self.object):
                 self.feedback_message = f"Object {self.object} does not exist in blackboard!"
                 return pytree.common.Status.FAILURE
             

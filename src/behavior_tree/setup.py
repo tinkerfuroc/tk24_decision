@@ -24,6 +24,8 @@ setup(
             'draw_ptrash = behavior_tree.main:draw_pick_up_trash',
             'demo = behavior_tree.main:demo',
             'draw_demo = behavior_tree.main:draw_demo',
+            'test_bb = behavior_tree.main:testBB',
+            'bb_test = behavior_tree.main:BBTest',
             'demo_grasp = behavior_tree.main:demoGrasp'
         ],
     },
